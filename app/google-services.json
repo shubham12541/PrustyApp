@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "1064315556223",
+    "firebase_url": "https://prustyapp.firebaseio.com",
+    "project_id": "prustyapp",
+    "storage_bucket": "prustyapp.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1064315556223:android:f6a8f1764d7266ed",
+        "android_client_info": {
+          "package_name": "com.tominc.prustyapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1064315556223-4lulb05noi60do139hl0iacpdus8mnhf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.tominc.prustyapp",
+            "certificate_hash": "740469a10bd1a8e9aff7ec2458360c5c6cac19ca"
+          }
+        },
+        {
+          "client_id": "1064315556223-ie99rlbt23jln6f4haoh4unp9v1j7amr.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCtFl9YtZFHySV2mKxt8wy6-37BBR_rUH4"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1064315556223-ie99rlbt23jln6f4haoh4unp9v1j7amr.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
