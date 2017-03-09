@@ -95,14 +95,13 @@ public class ProductLIstedFragment extends Fragment {
                         Product prod = new Product();
                         JSONObject obj = array.getJSONObject(i);
                         prod.setName(obj.getString("name"));
-                        prod.setPrice(obj.getString("price"));
-                        prod.setWanted(obj.getString("wanted"));
-                        prod.setEmail(obj.getString("email"));
-                        prod.setId(obj.getString("id"));
+                        prod.setPrice(Integer.parseInt(obj.getString("price")));
+//                        prod.setWanted(obj.getString("wanted"));
+//                        prod.setEmail(obj.getString("email"));
+                        prod.setProductId(obj.getString("productId"));
                         prod.setDescription(obj.getString("description"));
                         prod.setImageCount(Integer.valueOf(obj.getString("images")));
                         prod.setPhone(obj.getString("phone"));
-                        prod.setEmail2(obj.getString("email2"));
                         prod.setYear(obj.getString("year"));
                         prod.setCollege(obj.getString("college"));
                         items.add(prod);

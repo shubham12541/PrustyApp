@@ -63,7 +63,7 @@ public class ProductRecyclerViewAdapter extends RecyclerView.Adapter<ProductView
         FirebaseUser mUser = FirebaseAuth.getInstance().getCurrentUser();
         mStorage = FirebaseStorage.getInstance().getReference("ProductImages")
                 .child(mUser.getUid())
-                .child(items.get(position).getId())
+                .child(items.get(position).getProductId())
                 .child("images/" + position + ".jpg");
 
         mStorage.getFile(localFile)

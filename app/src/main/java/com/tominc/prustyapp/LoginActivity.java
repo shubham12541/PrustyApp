@@ -86,8 +86,8 @@ public class LoginActivity extends AppCompatActivity {
         String isLogin = mPrefs.getString("logedIn", null);
         if(isLogin!=null && isLogin.equals("yes")){
             Intent in = new Intent(LoginActivity.this, MainActivity.class);
-            startActivity(in);
-            finish();
+//            startActivity(in);
+//            finish();
         }
 
         toolbar = (Toolbar) findViewById(R.id.login_toolbar);
@@ -147,13 +147,13 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        mAuth.addAuthStateListener(mAuthListener);
+//        mAuth.addAuthStateListener(mAuthListener);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        mAuth.removeAuthStateListener(mAuthListener);
+//        mAuth.removeAuthStateListener(mAuthListener);
     }
 
     private void loginUser(final String email, final String pass){
@@ -165,6 +165,7 @@ public class LoginActivity extends AppCompatActivity {
                         Log.d(TAG, "onComplete: User Signed In");
                         if(!task.isSuccessful()){
                             Toast.makeText(LoginActivity.this, "Authentication Failed", Toast.LENGTH_SHORT).show();
+                            return;
                         }
                         String userId = task.getResult().getUser().getUid();
 

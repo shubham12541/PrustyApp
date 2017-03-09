@@ -155,7 +155,7 @@ public class Fragment1 extends Fragment {
 
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
+                Log.d(TAG, "onChildChanged: Product changed");
             }
 
             @Override
@@ -173,7 +173,7 @@ public class Fragment1 extends Fragment {
 
             @Override
             public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-                Log.e(TAG, "onChildMoved: Comment moved");
+                Log.e(TAG, "onChildMoved: Product moved");
 
             }
 

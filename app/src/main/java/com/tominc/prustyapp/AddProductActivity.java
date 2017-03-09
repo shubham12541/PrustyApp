@@ -533,11 +533,11 @@ public class AddProductActivity extends AppCompatActivity {
         DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("products");
         StorageReference mStorage = FirebaseStorage.getInstance().getReference("ProductImages");
 
+        DatabaseReference mUserRef = FirebaseDatabase.getInstance().getReference("users");
+
         Product prod = new Product();
         prod.setName(name);
-        prod.setPrice(price);
-        prod.setEmail(user.getEmail());
-        prod.setEmail2(email2);
+        prod.setPrice(Integer.parseInt(price));
         prod.setDescription(description);
         prod.setPhone(phone);
         prod.setYear(year);
@@ -545,12 +545,14 @@ public class AddProductActivity extends AppCompatActivity {
         prod.setImageCount(images_bitmap.size());
 
         String productUid = UUID.randomUUID().toString();
-        prod.setId(productUid);
+        prod.setProductId(productUid);
 
         FirebaseUser fUser = FirebaseAuth.getInstance().getCurrentUser();
         final String userId = fUser.getUid();
+        prod.setUserId(userId);
 
         mRef.child(userId).setValue(prod);
+        mUserRef.child(userId).child("productAdded").setValue(productUid);
 
         for(int i=0;i<images_bitmap.size();i++){
             Bitmap bitmap = images_bitmap.get(i);

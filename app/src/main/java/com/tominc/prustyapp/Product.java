@@ -10,25 +10,36 @@ import java.util.ArrayList;
  * Created by shubham on 14/1/16.
  */
 public class Product implements Serializable{
-    private String name;
-    private String price;
-    private String wanted;
-    private String email;
-    private String id;
-    private String description;
-    private int imageCount;
-    private ArrayList<Bitmap> imageBitmaps;
-    private String email2;
-    private String phone;
-    private String year;
-    private String college;
+    private String name, phone, year, college, productId, description, userId;
+    private int imageCount, price;
+//    private String name;
+//    private String price;
+//    private String wanted;
+//    private String email;
+//    private String id;
+//    private String description;
+//    private int imageCount;
+//    private ArrayList<Bitmap> imageBitmaps;
+//    private String email2;
+//    private String phone;
+//    private String year;
+//    private String college;
 
-    public String getEmail2() {
-        return email2;
+
+    public int getPrice() {
+        return price;
     }
 
-    public void setEmail2(String email2) {
-        this.email2 = email2;
+    public void setPrice(int price) {
+        this.price = price;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getPhone() {
@@ -55,20 +66,12 @@ public class Product implements Serializable{
         this.college = college;
     }
 
-    public ArrayList<Bitmap> getImageBitmaps() {
-        return imageBitmaps;
+    public String getProductId() {
+        return productId;
     }
 
-    public void setImageBitmaps(ArrayList<Bitmap> imageBitmaps) {
-        this.imageBitmaps = imageBitmaps;
-    }
-
-    public int getImageCount() {
-        return imageCount;
-    }
-
-    public void setImageCount(int imageCount) {
-        this.imageCount = imageCount;
+    public void setProductId(String productId) {
+        this.productId = productId;
     }
 
     public String getDescription() {
@@ -79,59 +82,19 @@ public class Product implements Serializable{
         this.description = description;
     }
 
-    private ArrayList<Integer> images = new ArrayList<>();
-
-
-    public void addImage(int image){
-        images.add(image);
-
+    public String getUserId() {
+        return userId;
     }
 
-    public ArrayList<Integer> getImages(){
-        return images;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
-    public String getId() {
-        return id;
+    public int getImageCount() {
+        return imageCount;
     }
 
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getPrice() {
-        return price;
-    }
-
-    public void setPrice(String price) {
-        this.price = price;
-    }
-
-    public String getWanted() {
-        return wanted;
-    }
-
-    public void setWanted(String wanted) {
-        this.wanted = wanted;
-    }
-
-    public void setImages(ArrayList<Integer> images) {
-        this.images = images;
+    public void setImageCount(int imageCount) {
+        this.imageCount = imageCount;
     }
 }

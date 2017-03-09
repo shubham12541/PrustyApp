@@ -47,6 +47,8 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        mAuth = FirebaseAuth.getInstance();
+
 
         mPrefs = getSharedPreferences("app", MODE_PRIVATE);
         Gson gson = new Gson();
@@ -85,6 +87,8 @@ public class MainActivity extends AppCompatActivity
         ImageView nPic = (ImageView) view.findViewById(R.id.imageView);
         nName.setText(user.getName());
         nEmail.setText(user.getEmail());
+
+        mAuth.addAuthStateListener(authStateListener);
 
     }
 

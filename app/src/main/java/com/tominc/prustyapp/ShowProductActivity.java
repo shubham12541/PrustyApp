@@ -155,7 +155,7 @@ public class ShowProductActivity extends AppCompatActivity {
 
         Intent in = getIntent();
         prod = (Product) in.getSerializableExtra("prod");
-        mPrefs = getSharedPreferences(prod.getEmail(), MODE_PRIVATE);
+        mPrefs = getSharedPreferences(prod.getProductId(), MODE_PRIVATE);
 
         mUser = FirebaseAuth.getInstance().getCurrentUser();
 
@@ -179,9 +179,9 @@ public class ShowProductActivity extends AppCompatActivity {
         productName.setText(prod.getName());
         productPrice.setText("Price: Rs. " + prod.getPrice());
         productDescription.setText(prod.getDescription());
-        productWanted.setText("Wanted: " + prod.getWanted());
+//        productWanted.setText("Wanted: " + prod.getWanted());
         profileName.setText(user.getName());
-        profileEmail.setText(prod.getEmail2());
+//        profileEmail.setText(prod.getEmail2());
         profilePhone.setText(prod.getPhone());
         profileCollege.setText("Year " + prod.getYear() + ", " + prod.getCollege());
 
@@ -191,7 +191,25 @@ public class ShowProductActivity extends AppCompatActivity {
         like_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                updateWanted();
+//                updateWanted();
+                if(!iWantIt){
+                    iWantIt = true;
+                    bookmarkProduct();
+                    like_button.setImageResource(android.R.drawable.star_big_on);
+
+                    SharedPreferences.Editor edit = mPrefs.edit();
+                    edit.putString(prod.getName(), "y");
+                    edit.apply();
+
+                } else{
+                    iWantIt=false;
+                    unbookmarkProduct();
+                    like_button.setImageResource(android.R.drawable.star_big_off);
+
+                    SharedPreferences.Editor edit = mPrefs.edit();
+                    edit.putString(prod.getName(), null);
+                    edit.apply();
+                }
             }
         });
 
@@ -235,9 +253,10 @@ public class ShowProductActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Intent sendIntent = new Intent(Intent.ACTION_VIEW);
                 sendIntent.setType("plain/text");
-                sendIntent.setData(Uri.parse(prod.getEmail2()));
+                FirebaseUser mUser = FirebaseAuth.getInstance().getCurrentUser();
+                sendIntent.setData(Uri.parse(mUser.getEmail()));
                 sendIntent.setClassName("com.google.android.gm", "com.google.android.gm.ComposeActivityGmail");
-                sendIntent.putExtra(Intent.EXTRA_EMAIL, new String[] { prod.getEmail(), prod.getEmail2() });
+                sendIntent.putExtra(Intent.EXTRA_EMAIL, new String[] { mUser.getEmail() });
                 sendIntent.putExtra(Intent.EXTRA_SUBJECT, prod.getName() + ": on app");
                 sendIntent.putExtra(Intent.EXTRA_TEXT, "I want to buy the product reply to negotiate.");
                 startActivity(sendIntent);
@@ -379,7 +398,7 @@ public class ShowProductActivity extends AppCompatActivity {
             }
             mStorage = FirebaseStorage.getInstance().getReference("ProductImages")
                     .child(mUser.getUid())
-                    .child(prod.getId())
+                    .child(prod.getProductId())
                     .child("images/" + i + ".jpg");
 
             int[] dimen = getImageDimensions();
@@ -444,7 +463,7 @@ public class ShowProductActivity extends AppCompatActivity {
                 }
                 mStorage = FirebaseStorage.getInstance().getReference("ProductImages")
                         .child(mUser.getUid())
-                        .child(prod.getId())
+                        .child(prod.getProductId())
                         .child("images/" + i + ".jpg");
 
                 int[] dimen = getImageDimensions();
@@ -550,7 +569,7 @@ public class ShowProductActivity extends AppCompatActivity {
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> params = new HashMap<>();
-                params.put("id", prod.getId());
+                params.put("id", prod.getProductId());
                 params.put("email", user.getEmail());
                 String what;
                 if(!iWantIt){
@@ -565,6 +584,31 @@ public class ShowProductActivity extends AppCompatActivity {
 
         queue.add(request);
 
+    }
+
+    private void bookmarkProduct(){
+        final ProgressDialog dialog = new ProgressDialog(ShowProductActivity.this);
+        dialog.setMessage("Updating...");
+        dialog.setCancelable(false);
+        dialog.show();
+
+        DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("users").child(prod.getUserId());
+        String productID = prod.getProductId();
+        mRef.child("productliked").setValue(productID);
+
+        dialog.dismiss();
+    }
+
+    private void unbookmarkProduct(){
+        final ProgressDialog dialog = new ProgressDialog(ShowProductActivity.this);
+        dialog.setMessage("Updating...");
+        dialog.setCancelable(false);
+        dialog.show();
+
+        DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("users").child(prod.getUserId());
+        mRef.child("productliked").child(prod.getProductId()).removeValue();
+
+        dialog.dismiss();
     }
 
 
