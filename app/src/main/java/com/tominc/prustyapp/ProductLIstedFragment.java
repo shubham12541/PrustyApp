@@ -20,6 +20,13 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -41,6 +48,10 @@ public class ProductLIstedFragment extends Fragment {
     ArrayList<Product> items = new ArrayList<>();
     private final String PRODUCT_LISTED_URL = Config.BASE_URL + "product_by_user.php";
     ProgressBar pb;
+
+    private final String TAG = "ProductListFragment";
+
+    DatabaseReference mRef;
 
 
     public ProductLIstedFragment() {
@@ -66,6 +77,9 @@ public class ProductLIstedFragment extends Fragment {
 
         Bundle args = getArguments();
         user = (User) args.getSerializable("user");
+
+        FirebaseUser mUser = FirebaseAuth.getInstance().getCurrentUser();
+        mRef = FirebaseDatabase.getInstance().getReference("users").child(mUser.getUid());
 
         pb = (ProgressBar) root.findViewById(R.id.product_progress);
 
@@ -130,6 +144,50 @@ public class ProductLIstedFragment extends Fragment {
             }
         };
         rq.add(req);
+    }
+
+    private void getLikedProducts(){
+        pb.setVisibility(View.VISIBLE);
+        mRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                User userData = dataSnapshot.getValue(User.class);
+                Log.d(TAG, "onDataChange: User: " + userData.toString());
+                String[] prodList = userData.getProductAdded();
+                fetchProductsFromList(prodList);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.d(TAG, "onCancelled: " + databaseError.toString());
+                pb.setVisibility(View.GONE);
+            }
+        });
+    }
+
+
+    private void fetchProductsFromList(String[] productsIds){
+        DatabaseReference mProdRef;
+        for(String prodId: productsIds){
+            mProdRef = FirebaseDatabase.getInstance().getReference("products").child(prodId);
+
+            mProdRef.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    Product prod = dataSnapshot.getValue(Product.class);
+                    Log.d(TAG, "onDataChange: Product found " + prod.getProductId());
+                    items.add(prod);
+                    adapter.notifyDataSetChanged();
+                    pb.setVisibility(View.GONE);
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    pb.setVisibility(View.GONE);
+                    Log.d(TAG, "onCancelled: " + databaseError.toString());
+                }
+            });
+        }
     }
 
 }

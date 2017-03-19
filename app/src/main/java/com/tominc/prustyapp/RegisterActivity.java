@@ -16,6 +16,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.util.Patterns;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -29,6 +30,9 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.basgeekball.awesomevalidation.AwesomeValidation;
+import com.basgeekball.awesomevalidation.ValidationStyle;
+import com.basgeekball.awesomevalidation.utility.RegexTemplate;
 import com.daimajia.slider.library.SliderTypes.BaseSliderView;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -36,7 +40,9 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
+import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.database.DataSnapshot;
@@ -61,7 +67,7 @@ import java.util.Map;
 
 public class RegisterActivity extends AppCompatActivity {
     EditText f_name, l_name, email, pass, c_pass, phone, college, year;
-    Button submit;
+    Button submit, clear;
     CircularImageView profile_image;
     Toolbar toolbar;
 
@@ -78,12 +84,15 @@ public class RegisterActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
 
+    private AwesomeValidation validator = new AwesomeValidation(ValidationStyle.UNDERLABEL);
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
         mAuth = FirebaseAuth.getInstance();
+        validator.setContext(this);
 
     }
 
@@ -112,6 +121,21 @@ public class RegisterActivity extends AppCompatActivity {
         year = (EditText) findViewById(R.id.register_year);
         profile_image = (CircularImageView) findViewById(R.id.register_image);
         submit = (Button) findViewById(R.id.register_submit);
+        clear = (Button) findViewById(R.id.register_clear);
+
+
+        validator.addValidation(RegisterActivity.this, R.id.register_f_name, "[a-zA-Z\\s]+", R.string.first_name_validation);
+        validator.addValidation(RegisterActivity.this, R.id.register_l_name, "[a-zA-Z\\s]+", R.string.last_name_validation);
+        validator.addValidation(RegisterActivity.this, R.id.register_email, Patterns.EMAIL_ADDRESS, R.string.email_validation);
+        validator.addValidation(RegisterActivity.this, R.id.register_phone, RegexTemplate.TELEPHONE, R.string.phone_validation);
+        validator.addValidation(RegisterActivity.this, R.id.register_college, "[a-zA-Z\\s]+", R.string.college_validation);
+
+//        String regexPassword = "(?=.*[a-z])(?=.*[A-Z])(?=.*[\\d])(?=.*[~`!@#\\$%\\^&\\*\\(\\)\\-_\\+=\\{\\}\\[\\]\\|\\;:\"<>,./\\?]).{8,}";
+
+//        validator.addValidation(RegisterActivity.this, R.id.register_pass, regexPassword, R.string.password_validation);
+// to validate a confirmation field (don't validate any rule other than confirmation on confirmation field)
+        validator.addValidation(RegisterActivity.this, R.id.register_con_pass, R.id.register_pass, R.string.password_duplication_validation);
+
 
         profile_image.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -134,29 +158,38 @@ public class RegisterActivity extends AppCompatActivity {
         submit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String s_name = f_name.getText().toString() + " " + l_name.getText().toString();
-                String s_email = email.getText().toString();
-                String s_pass = pass.getText().toString();
-                String s_c_pass = c_pass.getText().toString();
-                String s_phone = phone.getText().toString();
-                String s_college = college.getText().toString();
-                String s_year = year.getText().toString();
+                validator.clear();
+                if(validator.validate()){
+                    String s_name = f_name.getText().toString() + " " + l_name.getText().toString();
+                    String s_email = email.getText().toString();
+                    String s_pass = pass.getText().toString();
+                    String s_c_pass = c_pass.getText().toString();
+                    String s_phone = phone.getText().toString();
+                    String s_college = college.getText().toString();
+                    String s_year = year.getText().toString();
 
-                if (s_name.length() == 0 || s_email.length() == 0 || s_pass.length() == 0 || s_c_pass.length() == 0
-                        || s_phone.length() == 0 || s_c_pass.length() == 0 || s_college.length() == 0
-                        || s_year.length()==0) {
-                    Toast.makeText(getApplicationContext(), "Fill all details", Toast.LENGTH_SHORT).show();
-                } else {
-                    if (s_pass.equals(s_c_pass)) {
-                        addUser(s_name, s_email, s_pass, s_college, s_phone, s_year);
+                    if (s_name.length() == 0 || s_email.length() == 0 || s_pass.length() == 0 || s_c_pass.length() == 0
+                            || s_phone.length() == 0 || s_c_pass.length() == 0 || s_college.length() == 0
+                            || s_year.length()==0) {
+                        Toast.makeText(getApplicationContext(), "Fill all details", Toast.LENGTH_SHORT).show();
                     } else {
-                        Toast.makeText(getApplicationContext(), "Password donot match", Toast.LENGTH_SHORT).show();
+                        if (s_pass.equals(s_c_pass)) {
+                            addUser(s_name, s_email, s_pass, s_college, s_phone, s_year);
+                        } else {
+                            Toast.makeText(getApplicationContext(), "Password donot match", Toast.LENGTH_SHORT).show();
+                        }
                     }
                 }
+
             }
         });
 
-
+        clear.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                removeValidationInfo();
+            }
+        });
 
     }
 
@@ -213,9 +246,26 @@ public class RegisterActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
 
                         if(!task.isSuccessful()){
-                            Toast.makeText(RegisterActivity.this, "Authentication Failed", Toast.LENGTH_SHORT).show();
+//                            Toast.makeText(RegisterActivity.this, "Unable to add user ", Toast.LENGTH_SHORT).show();
+                            Log.d(TAG, "onComplete: " + task.getException());
+                            try {
+                                throw task.getException();
+                            } catch(FirebaseAuthWeakPasswordException e) {
+                                RegisterActivity.this.pass.setError(getString(R.string.error_weak_password));
+                                RegisterActivity.this.pass.requestFocus();
+                            } catch(FirebaseAuthInvalidCredentialsException e) {
+                                RegisterActivity.this.email.setError(getString(R.string.error_invalid_email));
+                                RegisterActivity.this.email.requestFocus();
+                            } catch(FirebaseAuthUserCollisionException e) {
+                                RegisterActivity.this.email.setError(getString(R.string.error_user_exists));
+                                RegisterActivity.this.email.requestFocus();
+                            } catch(Exception e) {
+                                Log.e(TAG, e.getMessage());
+                            }
                             return;
                         }
+
+
                         Log.d(TAG, "onComplete: User Created");
                         if(profilePic != null) {
 
@@ -298,6 +348,10 @@ public class RegisterActivity extends AppCompatActivity {
                         Toast.makeText(RegisterActivity.this, "Authentication Failed", Toast.LENGTH_SHORT).show();
                     }
                 });
+    }
+
+    private void removeValidationInfo(){
+        validator.clear();
     }
 
 }

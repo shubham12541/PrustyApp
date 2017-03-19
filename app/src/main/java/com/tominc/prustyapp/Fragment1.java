@@ -41,7 +41,6 @@ import java.util.ArrayList;
  */
 public class Fragment1 extends Fragment {
 
-    public final String GET_PRODUCT_URL = Config.BASE_URL + "get_products.php";
     ProgressBar pb;
     User user;
     RecyclerView recyclerView;
@@ -156,6 +155,7 @@ public class Fragment1 extends Fragment {
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
                 Log.d(TAG, "onChildChanged: Product changed");
+                pb.setVisibility(View.GONE);
             }
 
             @Override
@@ -168,12 +168,14 @@ public class Fragment1 extends Fragment {
 //                items = products;
                 items.remove(prod);
                 adapter.notifyDataSetChanged();
+                pb.setVisibility(View.GONE);
 
             }
 
             @Override
             public void onChildMoved(DataSnapshot dataSnapshot, String s) {
                 Log.e(TAG, "onChildMoved: Product moved");
+                pb.setVisibility(View.GONE);
 
             }
 
@@ -181,6 +183,7 @@ public class Fragment1 extends Fragment {
             public void onCancelled(DatabaseError databaseError) {
                 Log.e(TAG, "onCancelled: " + databaseError.toString());
                 Toast.makeText(getActivity(), "Failed to get Products", Toast.LENGTH_SHORT).show();
+                pb.setVisibility(View.GONE);
             }
         };
 

@@ -120,12 +120,28 @@
                 android:layout_height="wrap_content" />
 
 
-            <Button
-                android:id="@+id/register_submit"
-                android:text="Register"
-                android:layout_marginTop="16dp"
+            <LinearLayout
+                android:orientation="horizontal"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content">
+
+                <Button
+                    android:id="@+id/register_submit"
+                    android:text="Register"
+                    android:layout_weight="1"
+                    android:layout_marginTop="16dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+                <Button
+                    android:id="@+id/register_clear"
+                    android:text="Clear"
+                    android:layout_weight="1"
+                    android:layout_marginTop="16dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
 
         </LinearLayout>
     </ScrollView>

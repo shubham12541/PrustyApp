@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.util.Patterns;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -23,6 +24,8 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.basgeekball.awesomevalidation.AwesomeValidation;
+import com.basgeekball.awesomevalidation.ValidationStyle;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -56,6 +59,8 @@ public class LoginActivity extends AppCompatActivity {
     FirebaseAuth mAuth;
     FirebaseAuth.AuthStateListener mAuthListener;
     DatabaseReference mRefs;
+
+    private AwesomeValidation validator = new AwesomeValidation(ValidationStyle.UNDERLABEL);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,6 +104,8 @@ public class LoginActivity extends AppCompatActivity {
         pass = (EditText) findViewById(R.id.login_pass);
         submit = (Button) findViewById(R.id.login_submit);
 
+        validator.addValidation(LoginActivity.this, R.id.login_email, Patterns.EMAIL_ADDRESS, R.string.email_validation);
+
         findViewById(R.id.login_skip).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -132,13 +139,15 @@ public class LoginActivity extends AppCompatActivity {
         submit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String s_email = email.getText().toString();
-                String s_pass = pass.getText().toString();
+                if(validator.validate()){
+                    String s_email = email.getText().toString();
+                    String s_pass = pass.getText().toString();
 
-                if (s_email.length() == 0 || s_pass.length() == 0) {
-                    Toast.makeText(getApplicationContext(), "Incomplete Information", Toast.LENGTH_SHORT).show();
-                } else {
-                    loginUser(s_email, s_pass);
+                    if (s_email.length() == 0 || s_pass.length() == 0) {
+                        Toast.makeText(getApplicationContext(), "Incomplete Information", Toast.LENGTH_SHORT).show();
+                    } else {
+                        loginUser(s_email, s_pass);
+                    }
                 }
             }
         });

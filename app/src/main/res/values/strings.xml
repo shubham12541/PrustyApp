@@ -5,6 +5,17 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
     <string name="action_settings">Settings</string>
+    <string name="email_validation">Enter Valid Email</string>
+    <string name="first_name_validation">Invalid First Name</string>
+    <string name="last_name_validation">Invalid Lasy Name</string>
+    <string name="phone_validation">Invalid Phone</string>
+    <string name="college_validation">Invalid College Name</string>
+    <string name="password_validation">Password does not meet creteria</string>
+    <string name="password_duplication_validation">Passwords donot match</string>
+    <string name="error_weak_password">Weak Password</string>
+    <string name="error_invalid_email">Invalid email ID</string>
+    <string name="error_user_exists">Email already registed</string>
+
 
     <string name="temp">This is a real story of a young college girl who passed away last month in Coimbatore
 
