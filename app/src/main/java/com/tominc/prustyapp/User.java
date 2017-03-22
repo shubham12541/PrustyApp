@@ -1,13 +1,15 @@
 package com.tominc.prustyapp;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by shubham on 17/2/16.
  */
 public class User implements Serializable {
     String name, email, college, phone, year, userId;
-    String[] productliked, productAdded;
+    HashMap<String, String> productliked, productAdded;
 
     public String getName() {
         return name;
@@ -57,19 +59,19 @@ public class User implements Serializable {
         this.userId = userId;
     }
 
-    public String[] getProductliked() {
+    public HashMap<String, String> getProductliked() {
         return productliked;
     }
 
-    public void setProductliked(String[] productliked) {
+    public void setProductliked(HashMap<String, String> productliked) {
         this.productliked = productliked;
     }
 
-    public String[] getProductAdded() {
+    public HashMap<String, String> getProductAdded() {
         return productAdded;
     }
 
-    public void setProductAdded(String[] productAdded) {
+    public void setProductAdded(HashMap<String, String> productAdded) {
         this.productAdded = productAdded;
     }
 }

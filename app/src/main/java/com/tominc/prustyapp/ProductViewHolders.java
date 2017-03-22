@@ -31,8 +31,6 @@ public class ProductViewHolders extends RecyclerView.ViewHolder implements View.
 
         CardView card = (CardView) itemView.findViewById(R.id.list_item_card);
         card.setOnClickListener(this);
-
-
     }
 
     @Override

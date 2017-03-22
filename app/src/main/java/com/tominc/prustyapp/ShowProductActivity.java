@@ -34,6 +34,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -72,6 +73,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
+import de.mateware.snacky.Snacky;
+
 public class ShowProductActivity extends AppCompatActivity {
     RelativeLayout sliderLayout;
     Toolbar toolbar;
@@ -81,10 +84,13 @@ public class ShowProductActivity extends AppCompatActivity {
     TextView productName, productPrice, productDescription, productWanted,
             profileName, profileEmail, profilePhone, profileCollege;
     CircularImageView profile_pic;
+
+    ImageView share_call, share_message, share_email;
+
     LinearLayout profileCardFront, profileCardBack;
     CardView cardRootLayout;
     ImageView like_button, share_button;
-    Button bCall, bMessage, bEmail;
+    ScrollView allItems;
 
     private final String UPDATE_WANTED_URL = Config.BASE_URL +  "update_wanted.php";
     private final String IMAGE_DOWNLOAD_BASE = Config.BASE_URL + "uploads/";
@@ -126,9 +132,12 @@ public class ShowProductActivity extends AppCompatActivity {
         profileCollege = (TextView) findViewById(R.id.show_profile_college);
         like_button = (ImageView) findViewById(R.id.slider_item_like);
         share_button = (ImageView) findViewById(R.id.slider_item_share);
-        bCall = (Button) findViewById(R.id.product_call);
-        bMessage = (Button) findViewById(R.id.product_message);
-        bEmail = (Button) findViewById(R.id.product_email);
+        share_call = (ImageView) findViewById(R.id.product_call);
+        share_message = (ImageView) findViewById(R.id.product_message);
+        share_email = (ImageView) findViewById(R.id.product_email);
+        allItems = (ScrollView) findViewById(R.id.show_product_scroll);
+
+
 
         profileCardFront.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -164,6 +173,7 @@ public class ShowProductActivity extends AppCompatActivity {
         String json = mPrefs_user.getString("user", "");
         user = gson.fromJson(json, User.class);
 
+        loadProfilePic();
 
         String liked = mPrefs.getString(prod.getName(), null);
         if(liked!=null){
@@ -181,7 +191,7 @@ public class ShowProductActivity extends AppCompatActivity {
         productDescription.setText(prod.getDescription());
 //        productWanted.setText("Wanted: " + prod.getWanted());
         profileName.setText(user.getName());
-//        profileEmail.setText(prod.getEmail2());
+        profileEmail.setText(user.getEmail());
         profilePhone.setText(prod.getPhone());
         profileCollege.setText("Year " + prod.getYear() + ", " + prod.getCollege());
 
@@ -195,7 +205,8 @@ public class ShowProductActivity extends AppCompatActivity {
                 if(!iWantIt){
                     iWantIt = true;
                     bookmarkProduct();
-                    like_button.setImageResource(android.R.drawable.star_big_on);
+                    like_button.setImageResource(R.drawable.ic_bookmark_black_24dp);
+//                    like_button.setImageResource(android.R.drawable.star_big_on);
 
                     SharedPreferences.Editor edit = mPrefs.edit();
                     edit.putString(prod.getName(), "y");
@@ -205,6 +216,7 @@ public class ShowProductActivity extends AppCompatActivity {
                     iWantIt=false;
                     unbookmarkProduct();
                     like_button.setImageResource(android.R.drawable.star_big_off);
+                    like_button.setImageResource(R.drawable.ic_bookmark_border_black_24dp);
 
                     SharedPreferences.Editor edit = mPrefs.edit();
                     edit.putString(prod.getName(), null);
@@ -220,7 +232,7 @@ public class ShowProductActivity extends AppCompatActivity {
             }
         });
 
-        bCall.setOnClickListener(new View.OnClickListener() {
+        share_call.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent in = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:"+"+91"+prod.getPhone()));
@@ -228,27 +240,14 @@ public class ShowProductActivity extends AppCompatActivity {
             }
         });
 
-        bMessage.setOnClickListener(new View.OnClickListener() {
+        share_message.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                try {
-                    Intent in = new Intent(Intent.ACTION_SEND, Uri.parse("smsto:"+prod.getPhone()));
-                    in.setType("text/plain");
-                    String text = "Regarding your product " + prod.getName() + " in the app, I would like to buy it. Please reply to negotiate.";
-                    PackageInfo info = getPackageManager().getPackageInfo("com.whatsapp", PackageManager.GET_META_DATA);
-                    in.setPackage("com.whatsapp");
-                    in.putExtra(Intent.EXTRA_TEXT, text);
-                    startActivity(Intent.createChooser(in, "with"));
-
-                } catch (PackageManager.NameNotFoundException e) {
-                    e.printStackTrace();
-                    Log.e("ShowActivity", "whatsapp not installed");
-                }
-
+                smsMessage();
             }
         });
 
-        bEmail.setOnClickListener(new View.OnClickListener() {
+        share_email.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent sendIntent = new Intent(Intent.ACTION_VIEW);
@@ -289,8 +288,13 @@ public class ShowProductActivity extends AppCompatActivity {
 //                    new DownloadImages(prod.getImageCount(), prod.getEmail(), prod.getName()).execute();
                     downloadAllImages();
                 } else{
-                    Toast.makeText(getApplicationContext(), "Permisston required to upload pic", Toast.LENGTH_SHORT)
-                            .show();
+//                    Toast.makeText(getApplicationContext(), "Permisston required to upload pic", Toast.LENGTH_SHORT)
+//                            .show();
+                    Snacky.builder().setView(allItems)
+                            .setActivty(ShowProductActivity.this)
+                            .setText(R.string.permission_warning)
+                            .setDuration(Snacky.LENGTH_SHORT)
+                            .warning();
                 }
                 return;
         }
@@ -304,6 +308,12 @@ public class ShowProductActivity extends AppCompatActivity {
         }
         root.startAnimation(flipanim);
 
+    }
+
+    @Override
+    protected void onStop() {
+        mSlider.stopAutoCycle();
+        super.onStop();
     }
 
     public class FlipAnimation extends Animation {
@@ -397,7 +407,6 @@ public class ShowProductActivity extends AppCompatActivity {
                 continue;
             }
             mStorage = FirebaseStorage.getInstance().getReference("ProductImages")
-                    .child(mUser.getUid())
                     .child(prod.getProductId())
                     .child("images/" + i + ".jpg");
 
@@ -419,6 +428,13 @@ public class ShowProductActivity extends AppCompatActivity {
                             Glide.with(ShowProductActivity.this)
                                     .load(tempFile2)
                                     .into(imageView);
+
+                            imageView.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    Toast.makeText(ShowProductActivity.this, "Clicked on image " + finalI, Toast.LENGTH_SHORT).show();
+                                }
+                            });
 
                             SliderView sliderView = new SliderView(ShowProductActivity.this);
                             sliderView.setScaleType(BaseSliderView.ScaleType.CenterCrop);
@@ -593,8 +609,9 @@ public class ShowProductActivity extends AppCompatActivity {
         dialog.show();
 
         DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("users").child(prod.getUserId());
+
         String productID = prod.getProductId();
-        mRef.child("productliked").setValue(productID);
+        mRef.child("productliked").push().setValue(productID);
 
         dialog.dismiss();
     }
@@ -611,5 +628,66 @@ public class ShowProductActivity extends AppCompatActivity {
         dialog.dismiss();
     }
 
+    private void loadProfilePic(){
+        StorageReference mProfileRef = FirebaseStorage
+                .getInstance()
+                .getReference("profiles")
+                .child("images/" + mUser.getUid() + "/profile.jpg");
+
+
+        final File tempFile;
+        try {
+            tempFile = File.createTempFile("images", "jpg");
+
+
+            mProfileRef.getFile(tempFile)
+                    .addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                            Glide.with(ShowProductActivity.this)
+                                    .load(tempFile)
+                                    .into(profile_pic);
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.d(TAG, "onFailure: Profile image could not be downloaded " + e.toString());
+                            Glide.with(ShowProductActivity.this)
+                                    .load(R.drawable.ic_male_avatar)
+                                    .into(profile_pic);
+                        }
+                    });
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.d(TAG, "onCreateView: Temp file could not be created");
+        }
+    }
+
+
+    private void whatsappMessage(){
+        try {
+            Intent in = new Intent(Intent.ACTION_SEND, Uri.parse("smsto:"+prod.getPhone()));
+            in.setType("text/plain");
+            String text = "Regarding your product " + prod.getName() + " in the app, I would like to buy it. Please reply to negotiate.";
+            PackageInfo info = getPackageManager().getPackageInfo("com.whatsapp", PackageManager.GET_META_DATA);
+            in.setPackage("com.whatsapp");
+            in.putExtra(Intent.EXTRA_TEXT, text);
+            startActivity(Intent.createChooser(in, "with"));
+
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+            Log.e("ShowActivity", "whatsapp not installed");
+        }
+
+    }
+
+    private void smsMessage(){
+        Intent intentsms = new Intent( Intent.ACTION_VIEW, Uri.parse( "sms:" + "" ) );
+        intentsms.putExtra( "sms_body", "Regarging your product " + prod.getName() + " in the app " + getResources().getString(R.string.app_name) + ", I would like to buy it, Please reply for furthur dealing" );
+        intentsms.putExtra("address", "+91" + prod.getPhone());
+        startActivity( intentsms );
+    }
 
 }

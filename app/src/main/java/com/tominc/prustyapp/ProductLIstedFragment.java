@@ -91,70 +91,24 @@ public class ProductLIstedFragment extends Fragment {
         adapter = new ProductRecyclerViewAdapter(getActivity(), items);
         recyclerView.setAdapter(adapter);
 
-        fetchByEmail();
+        getListedProducts();
 
         return root;
     }
 
-    private void fetchByEmail(){
-        pb.setVisibility(View.VISIBLE);
-        RequestQueue rq = Volley.newRequestQueue(getActivity());
-        StringRequest req = new StringRequest(Request.Method.POST, PRODUCT_LISTED_URL, new Response.Listener<String>() {
-            @Override
-            public void onResponse(String s) {
-                try {
-                    JSONObject jsonObject = new JSONObject(s);
-                    JSONArray array = jsonObject.getJSONArray("products");
-                    for(int i=0;i<array.length();i++){
-                        Product prod = new Product();
-                        JSONObject obj = array.getJSONObject(i);
-                        prod.setName(obj.getString("name"));
-                        prod.setPrice(Integer.parseInt(obj.getString("price")));
-//                        prod.setWanted(obj.getString("wanted"));
-//                        prod.setEmail(obj.getString("email"));
-                        prod.setProductId(obj.getString("productId"));
-                        prod.setDescription(obj.getString("description"));
-                        prod.setImageCount(Integer.valueOf(obj.getString("images")));
-                        prod.setPhone(obj.getString("phone"));
-                        prod.setYear(obj.getString("year"));
-                        prod.setCollege(obj.getString("college"));
-                        items.add(prod);
-                    }
-                    adapter.notifyDataSetChanged();
-                    pb.setVisibility(View.GONE);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    pb.setVisibility(View.GONE);
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError volleyError) {
-                Toast.makeText(getActivity(), "No Connection", Toast.LENGTH_SHORT).show();
-                Log.d("Fragment1", volleyError.toString());
-                pb.setVisibility(View.GONE);
-            }
-        }){
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                Map<String, String> params = new HashMap<>();
-                params.put("email", user.getEmail());
 
-                return params;
-            }
-        };
-        rq.add(req);
-    }
-
-    private void getLikedProducts(){
+    private void getListedProducts(){
         pb.setVisibility(View.VISIBLE);
         mRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 User userData = dataSnapshot.getValue(User.class);
                 Log.d(TAG, "onDataChange: User: " + userData.toString());
-                String[] prodList = userData.getProductAdded();
-                fetchProductsFromList(prodList);
+                HashMap<String, String> prodList = userData.getProductAdded();
+//                ArrayList<String> prodList = userData.getProductAdded();
+                if(prodList != null){
+                    fetchProductsFromList(prodList);
+                }
             }
 
             @Override
@@ -166,8 +120,35 @@ public class ProductLIstedFragment extends Fragment {
     }
 
 
-    private void fetchProductsFromList(String[] productsIds){
+    private void fetchProductsFromList(HashMap<String, String> productsIds){
         DatabaseReference mProdRef;
+
+        for(Map.Entry<String, String> product: productsIds.entrySet()){
+            String prodId = product.getValue();
+            mProdRef = FirebaseDatabase.getInstance().getReference("products").child(prodId);
+
+            mProdRef.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    Product prod = dataSnapshot.getValue(Product.class);
+                    Log.d(TAG, "onDataChange: Product found " + prod.getProductId());
+                    items.add(prod);
+                    adapter.notifyDataSetChanged();
+                    pb.setVisibility(View.GONE);
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    pb.setVisibility(View.GONE);
+                    Log.d(TAG, "onCancelled: " + databaseError.toString());
+                }
+            });
+        }
+    }
+
+    private void fetchProductsFromList(ArrayList<String> productsIds){
+        DatabaseReference mProdRef;
+
         for(String prodId: productsIds){
             mProdRef = FirebaseDatabase.getInstance().getReference("products").child(prodId);
 
@@ -189,5 +170,7 @@ public class ProductLIstedFragment extends Fragment {
             });
         }
     }
+
+    //TODO: create no data found layout XML and add it whwn required.
 
 }

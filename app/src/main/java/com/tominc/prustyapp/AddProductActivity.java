@@ -39,6 +39,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
@@ -79,16 +80,18 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
+import de.mateware.snacky.Snacky;
+
 public class AddProductActivity extends AppCompatActivity {
     RelativeLayout sliderLayout;
     Toolbar toolbar;
     private SliderLayout mSlider;
 
     EditText name, price, description, phone, email, year, college;
+    ScrollView allItems;
 
     ArrayList<Bitmap> images_bitmap = new ArrayList<>();
 
-    private String UPLOAD_URL = Config.BASE_URL + "volley_upload.php";
     private int IMAGE_GALLERY=12;
     private int IMAGE_CAMERA=13;
     File photoFile = null;
@@ -107,6 +110,7 @@ public class AddProductActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_product);
 
+        allItems = (ScrollView) findViewById(R.id.add_prod_items);
         toolbar = (Toolbar) findViewById(R.id.add_product_toolbar);
         toolbar.setTitle("Add Product");
         toolbar.setTitleTextColor(Color.WHITE);
@@ -143,6 +147,8 @@ public class AddProductActivity extends AppCompatActivity {
                     ActivityCompat.requestPermissions(AddProductActivity.this,
                             new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE},
                             PERMISSION_REQUSET);
+                } else{
+                    performImageSelection();
                 }
 
 
@@ -172,8 +178,14 @@ public class AddProductActivity extends AppCompatActivity {
                 if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
                     performImageSelection();
                 } else{
-                    Toast.makeText(getApplicationContext(), "Permisston required to upload pic", Toast.LENGTH_SHORT)
-                            .show();
+//                    Toast.makeText(getApplicationContext(), "Permisston required to upload pic", Toast.LENGTH_SHORT)
+//                            .show();
+
+                    Snacky.builder().setView(allItems)
+                            .setActivty(AddProductActivity.this)
+                            .setText(R.string.permission_warning)
+                            .setDuration(Snacky.LENGTH_SHORT)
+                            .warning();
                 }
                 return;
         }
@@ -551,8 +563,12 @@ public class AddProductActivity extends AppCompatActivity {
         final String userId = fUser.getUid();
         prod.setUserId(userId);
 
-        mRef.child(userId).setValue(prod);
-        mUserRef.child(userId).child("productAdded").setValue(productUid);
+        mRef.child(productUid).setValue(prod);
+
+//        ArrayList<String> prodList = new ArrayList<>();
+//        prodList.add(productUid);
+//        mUserRef.child(userId).child("productAdded").setValue(prodList);
+        mUserRef.child(userId).child("productAdded").push().setValue(productUid);
 
         for(int i=0;i<images_bitmap.size();i++){
             Bitmap bitmap = images_bitmap.get(i);
@@ -560,7 +576,7 @@ public class AddProductActivity extends AppCompatActivity {
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
             byte[] data = baos.toByteArray();
 
-            UploadTask uploadTask = mStorage.child(userId).child(productUid).child("images/" + i + ".jpg").putBytes(data);
+            UploadTask uploadTask = mStorage.child(productUid).child("images/" + i + ".jpg").putBytes(data);
             uploadTask.addOnFailureListener(new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception exception) {

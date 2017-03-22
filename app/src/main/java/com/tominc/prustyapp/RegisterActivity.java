@@ -20,6 +20,8 @@ import android.util.Patterns;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
@@ -57,6 +59,8 @@ import com.google.firebase.storage.UploadTask;
 import com.google.gson.Gson;
 import com.mikhaellopez.circularimageview.CircularImageView;
 
+import net.bohush.geometricprogressview.GeometricProgressView;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -65,11 +69,16 @@ import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Map;
 
+import de.mateware.snacky.Snacky;
+
 public class RegisterActivity extends AppCompatActivity {
     EditText f_name, l_name, email, pass, c_pass, phone, college, year;
     Button submit, clear;
     CircularImageView profile_image;
     Toolbar toolbar;
+    LinearLayout allRegisterItems;
+//    ProgressBar pb;
+    GeometricProgressView pb;
 
     private final int IMAGE_REQUEST=12;
     SharedPreferences mPref;
@@ -122,6 +131,7 @@ public class RegisterActivity extends AppCompatActivity {
         profile_image = (CircularImageView) findViewById(R.id.register_image);
         submit = (Button) findViewById(R.id.register_submit);
         clear = (Button) findViewById(R.id.register_clear);
+        pb = (GeometricProgressView) findViewById(R.id.progress_bar);
 
 
         validator.addValidation(RegisterActivity.this, R.id.register_f_name, "[a-zA-Z\\s]+", R.string.first_name_validation);
@@ -171,12 +181,23 @@ public class RegisterActivity extends AppCompatActivity {
                     if (s_name.length() == 0 || s_email.length() == 0 || s_pass.length() == 0 || s_c_pass.length() == 0
                             || s_phone.length() == 0 || s_c_pass.length() == 0 || s_college.length() == 0
                             || s_year.length()==0) {
-                        Toast.makeText(getApplicationContext(), "Fill all details", Toast.LENGTH_SHORT).show();
+//                        Toast.makeText(getApplicationContext(), "Fill all details", Toast.LENGTH_SHORT).show();
+                        Snacky.builder().setView(allRegisterItems)
+                                .setActivty(RegisterActivity.this)
+                                .setText(R.string.fill_details_warning)
+                                .setDuration(Snacky.LENGTH_SHORT)
+                                .error();
                     } else {
                         if (s_pass.equals(s_c_pass)) {
+                            logingInView();
                             addUser(s_name, s_email, s_pass, s_college, s_phone, s_year);
                         } else {
-                            Toast.makeText(getApplicationContext(), "Password donot match", Toast.LENGTH_SHORT).show();
+//                            Toast.makeText(getApplicationContext(), "Password donot match", Toast.LENGTH_SHORT).show();
+                            Snacky.builder().setView(allRegisterItems)
+                                    .setActivty(RegisterActivity.this)
+                                    .setText(R.string.password_mismatch_warning)
+                                    .setDuration(Snacky.LENGTH_SHORT)
+                                    .error();
                         }
                     }
                 }
@@ -205,8 +226,14 @@ public class RegisterActivity extends AppCompatActivity {
                 if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
                     pickPhoto();
                 } else{
-                    Toast.makeText(getApplicationContext(), "Permisston required to upload pic", Toast.LENGTH_SHORT)
-                            .show();
+//                    Toast.makeText(getApplicationContext(), "Permisston required to upload pic", Toast.LENGTH_SHORT)
+//                            .show();
+                    Snacky.builder().setView(allRegisterItems)
+                            .setActivty(RegisterActivity.this)
+                            .setText(R.string.permission_warning)
+                            .setDuration(Snacky.LENGTH_SHORT)
+                            .warning();
+                    defaultView();
                 }
                 return;
         }
@@ -231,8 +258,10 @@ public class RegisterActivity extends AppCompatActivity {
 
                     profile_image.setImageBitmap(bmp);
 
+
                 } catch (IOException e) {
                     e.printStackTrace();
+                    defaultView();
                 }
             }
         }
@@ -247,6 +276,11 @@ public class RegisterActivity extends AppCompatActivity {
 
                         if(!task.isSuccessful()){
 //                            Toast.makeText(RegisterActivity.this, "Unable to add user ", Toast.LENGTH_SHORT).show();
+                            Snacky.builder().setView(allRegisterItems)
+                                    .setActivty(RegisterActivity.this)
+                                    .setText(R.string.user_creation_error)
+                                    .setDuration(Snacky.LENGTH_SHORT)
+                                    .error();
                             Log.d(TAG, "onComplete: " + task.getException());
                             try {
                                 throw task.getException();
@@ -265,11 +299,12 @@ public class RegisterActivity extends AppCompatActivity {
                             return;
                         }
 
+                        FirebaseUser firebaseUser = task.getResult().getUser();
 
                         Log.d(TAG, "onComplete: User Created");
                         if(profilePic != null) {
 
-                            mStorageRef = mStorageRef.child("images/" + profilePic.getLastPathSegment());
+                            mStorageRef = mStorageRef.child("images/" + firebaseUser.getUid() + "/profile.jpg");
                             StorageMetadata metadata = new StorageMetadata.Builder()
                                     .setContentType("image/jpg")
                                     .build();
@@ -290,7 +325,7 @@ public class RegisterActivity extends AppCompatActivity {
                             });
 
                         }
-                        FirebaseUser firebaseUser = task.getResult().getUser();
+
 
                         UserProfileChangeRequest profileUpdates;
                         if(profilePic != null){
@@ -345,13 +380,29 @@ public class RegisterActivity extends AppCompatActivity {
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(RegisterActivity.this, "Authentication Failed", Toast.LENGTH_SHORT).show();
+//                        Toast.makeText(RegisterActivity.this, "Authentication Failed", Toast.LENGTH_SHORT).show();
+                        Snacky.builder().setView(allRegisterItems)
+                                .setActivty(RegisterActivity.this)
+                                .setText(R.string.authentication_error)
+                                .setDuration(Snacky.LENGTH_SHORT)
+                                .error();
+                        defaultView();
                     }
                 });
     }
 
     private void removeValidationInfo(){
         validator.clear();
+    }
+
+    private void logingInView(){
+        allRegisterItems.setVisibility(View.GONE);
+        pb.setVisibility(View.VISIBLE);
+    }
+
+    private void defaultView(){
+        allRegisterItems.setVisibility(View.VISIBLE);
+        pb.setVisibility(View.INVISIBLE);
     }
 
 }

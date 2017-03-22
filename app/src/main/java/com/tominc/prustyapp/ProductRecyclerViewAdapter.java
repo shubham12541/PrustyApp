@@ -49,9 +49,12 @@ public class ProductRecyclerViewAdapter extends RecyclerView.Adapter<ProductView
 
     @Override
     public void onBindViewHolder(final ProductViewHolders holder, int position)  {
+        Log.d(TAG, "onBindViewHolder: " + position + " " + items.get(position).getName() + " " + items.get(position).getPrice());
         holder.name.setText(items.get(position).getName());
-        holder.price.setText(items.get(position).getPrice());
+//        holder.price.setText(items.get(position).getPrice());
+        holder.price.setText(Integer.toString(items.get(position).getPrice()));
         final File localFile;
+
         try{
             localFile = File.createTempFile("images", "jpg");
         } catch (IOException e) {
@@ -62,9 +65,8 @@ public class ProductRecyclerViewAdapter extends RecyclerView.Adapter<ProductView
 
         FirebaseUser mUser = FirebaseAuth.getInstance().getCurrentUser();
         mStorage = FirebaseStorage.getInstance().getReference("ProductImages")
-                .child(mUser.getUid())
                 .child(items.get(position).getProductId())
-                .child("images/" + position + ".jpg");
+                .child("images/1.jpg");
 
         mStorage.getFile(localFile)
                 .addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
@@ -78,7 +80,10 @@ public class ProductRecyclerViewAdapter extends RecyclerView.Adapter<ProductView
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Log.e(TAG, "onFailure: File could not be downloaded " + e.toString());
+                        Log.e(TAG, "onFailure: File could not be downloaded or available " + e.toString());
+                        Glide.with(c)
+                                .load(R.drawable.ic_not_available)
+                                .into(holder.image);
                     }
                 });
 

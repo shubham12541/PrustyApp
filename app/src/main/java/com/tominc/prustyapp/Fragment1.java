@@ -15,6 +15,7 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -36,6 +37,8 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
+import de.mateware.snacky.Snacky;
+
 /**
  * Created by shubham on 13/1/16.
  */
@@ -49,6 +52,7 @@ public class Fragment1 extends Fragment {
     ArrayList<Product> items;
     ProductRecyclerViewAdapter adapter;
     RequestQueue rq;
+    RelativeLayout allItems;
 
     DatabaseReference mRef;
 
@@ -94,8 +98,10 @@ public class Fragment1 extends Fragment {
         if(type==1){
             User user = (User) bundle.getSerializable("user");
         } else{
+
             User user = (User) bundle.getSerializable("user");
             Product prod = (Product) bundle.getSerializable("prod");
+            Log.d(TAG, "onCreateView: Prod Found " + prod.toString());
             items.add(prod);
             adapter.notifyDataSetChanged();
         }
@@ -104,6 +110,7 @@ public class Fragment1 extends Fragment {
         rq = Volley.newRequestQueue(getActivity());
 
         pb = (ProgressBar) root.findViewById(R.id.product_progress);
+        allItems = (RelativeLayout) root.findViewById(R.id.fragment1_items);
         pb.setVisibility(View.VISIBLE);
 
 //        final GridView list;
@@ -141,10 +148,12 @@ public class Fragment1 extends Fragment {
         ChildEventListener childEventListener = new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                Log.d(TAG, "onChildAdded: New Item");
+                Log.d(TAG, "onChildAdded: New Product ");
 
                 Product prod = dataSnapshot.getValue(Product.class);
                 products.add(prod);
+
+                Log.d(TAG, "onChildAdded: Product: " + prod.getName() + " "  + prod.getPrice());
 
 //                items = products;
                 items.add(prod);
@@ -182,7 +191,12 @@ public class Fragment1 extends Fragment {
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 Log.e(TAG, "onCancelled: " + databaseError.toString());
-                Toast.makeText(getActivity(), "Failed to get Products", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getActivity(), "Failed to get Products", Toast.LENGTH_SHORT).show();
+                Snacky.builder().setView(allItems)
+                        .setActivty(getActivity())
+                        .setText(R.string.product_get_failed_error)
+                        .setDuration(Snacky.LENGTH_SHORT)
+                        .warning();
                 pb.setVisibility(View.GONE);
             }
         };
