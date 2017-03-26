@@ -77,8 +77,9 @@ public class RegisterActivity extends AppCompatActivity {
     CircularImageView profile_image;
     Toolbar toolbar;
     LinearLayout allRegisterItems;
-//    ProgressBar pb;
-    GeometricProgressView pb;
+
+//    GeometricProgressView pb;
+    View pb;
 
     private final int IMAGE_REQUEST=12;
     SharedPreferences mPref;
@@ -131,8 +132,7 @@ public class RegisterActivity extends AppCompatActivity {
         profile_image = (CircularImageView) findViewById(R.id.register_image);
         submit = (Button) findViewById(R.id.register_submit);
         clear = (Button) findViewById(R.id.register_clear);
-        pb = (GeometricProgressView) findViewById(R.id.progress_bar);
-
+        pb =  findViewById(R.id.logging_in);
 
         validator.addValidation(RegisterActivity.this, R.id.register_f_name, "[a-zA-Z\\s]+", R.string.first_name_validation);
         validator.addValidation(RegisterActivity.this, R.id.register_l_name, "[a-zA-Z\\s]+", R.string.last_name_validation);

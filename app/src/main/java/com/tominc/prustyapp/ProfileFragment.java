@@ -32,7 +32,6 @@ import java.io.IOException;
 public class ProfileFragment extends Fragment {
 
     Toolbar toolbar;
-    Button liked, listed;
     CircularImageView profile_image;
     TextView name, email, phone, year, college;
     SharedPreferences mPrefs;
@@ -76,13 +75,11 @@ public class ProfileFragment extends Fragment {
         year = (TextView) root.findViewById(R.id.show_profile_year);
         college = (TextView) root.findViewById(R.id.show_profile_college);
         profile_image = (CircularImageView) root.findViewById(R.id.show_profile_image);
-        liked = (Button) root.findViewById(R.id.show_profile_liked);
-        listed = (Button) root.findViewById(R.id.show_profile_listed);
 
 
         name.setText(user.getName());
         email.setText(user.getEmail());
-        phone.setText(user.getPhone());
+        phone.setText("Phone: " + user.getPhone());
         year.setText("Year: " + user.getYear());
         college.setText("College: " + user.getCollege());
 
@@ -103,9 +100,10 @@ public class ProfileFragment extends Fragment {
                         @Override
                         public void onFailure(@NonNull Exception e) {
                             Log.d(TAG, "onFailure: Profile image could not be downloaded " + e.toString());
-                            Glide.with(getActivity())
-                                    .load(R.drawable.ic_male_avatar)
-                                    .into(profile_image);
+                            // make avatar is default
+//                            Glide.with(getActivity())
+//                                    .load(R.drawable.ic_male_avatar)
+//                                    .into(profile_image);
                         }
                     });
 
@@ -113,22 +111,6 @@ public class ProfileFragment extends Fragment {
             e.printStackTrace();
             Log.d(TAG, "onCreateView: Temp file could not be created");
         }
-
-
-
-        liked.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-            }
-        });
-
-        listed.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-            }
-        });
 
         return root;
 

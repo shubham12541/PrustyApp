@@ -47,7 +47,8 @@ public class ProductLikedFragment extends Fragment {
     ProductRecyclerViewAdapter adapter;
     ArrayList<Product> items = new ArrayList<>();
     private final String PRODUCT_LIKED_URL = Config.BASE_URL + "product_liked_by_user.php";
-    ProgressBar pb;
+    View pb;
+    View noDataFound;
 
     private final String TAG = "ProductLikedFragment";
 
@@ -79,8 +80,8 @@ public class ProductLikedFragment extends Fragment {
         Bundle args = getArguments();
         user = (User) args.getSerializable("user");
 
-        pb = (ProgressBar) root.findViewById(R.id.product_progress);
-
+        pb =  root.findViewById(R.id.loading_data);
+        noDataFound = root.findViewById(R.id.no_data_found);
 
         recyclerView = (RecyclerView) root.findViewById(R.id.product_liked_recycler);
         recyclerView.setHasFixedSize(true);
@@ -106,6 +107,9 @@ public class ProductLikedFragment extends Fragment {
 //                ArrayList<String> prodList = userData.getProductliked();
                 if(prodList != null){
                     fetchProductsFromList(prodList);
+                } else{
+                    noDataFound.setVisibility(View.VISIBLE);
+                    pb.setVisibility(View.GONE);
                 }
             }
 

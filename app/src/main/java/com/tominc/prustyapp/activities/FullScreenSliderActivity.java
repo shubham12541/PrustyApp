@@ -1,10 +1,12 @@
 package com.tominc.prustyapp.activities;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Toast;
 
 import com.daimajia.slider.library.Animations.DescriptionAnimation;
@@ -12,6 +14,7 @@ import com.daimajia.slider.library.SliderLayout;
 import com.daimajia.slider.library.SliderTypes.BaseSliderView;
 import com.daimajia.slider.library.SliderTypes.TextSliderView;
 import com.tominc.prustyapp.R;
+import com.tominc.prustyapp.models.FullScreenSliderView;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -25,10 +28,14 @@ public class FullScreenSliderActivity extends AppCompatActivity implements BaseS
     private ArrayList<String> imagePaths;
     private String prodId;
     SharedPreferences mPrefs;
+    int imageCount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        hideWindow();
+
         setContentView(R.layout.activity_full_screen_slider);
 
         mSlider = (SliderLayout) findViewById(R.id.slider);
@@ -38,7 +45,7 @@ public class FullScreenSliderActivity extends AppCompatActivity implements BaseS
 
         mPrefs = getSharedPreferences(prodId, MODE_PRIVATE);
 
-        int imageCount = mPrefs.getInt("imageCount", 0);
+        imageCount = mPrefs.getInt("imageCount", 0);
 
         for(int i=0;i<imageCount;i++){
             String filePath = mPrefs.getString("image"+i, null);
@@ -48,9 +55,10 @@ public class FullScreenSliderActivity extends AppCompatActivity implements BaseS
         }
 
         mSlider.setPresetTransformer(SliderLayout.Transformer.Stack);
-        mSlider.setPresetIndicator(SliderLayout.PresetIndicators.Center_Bottom);
+//        mSlider.setPresetIndicator(SliderLayout.PresetIndicators.Center_Bottom);
         mSlider.setCustomAnimation(new DescriptionAnimation());
         mSlider.setDuration(4000);
+        mSlider.stopAutoCycle();
 
         mSlider.setPresetTransformer("Stack");
 
@@ -59,15 +67,15 @@ public class FullScreenSliderActivity extends AppCompatActivity implements BaseS
     private void addImage(String filePath, int count){
         File file = new File(filePath);
 
-        TextSliderView textSliderView = new TextSliderView(FullScreenSliderActivity.this);
-        textSliderView.description((count+1) + "")
+        FullScreenSliderView sliderView = new FullScreenSliderView(FullScreenSliderActivity.this);
+        sliderView.description((count+1) + "/" + (imageCount) + "")
                 .image(file)
                 .setScaleType(BaseSliderView.ScaleType.FitCenterCrop)
-                .setOnSliderClickListener(FullScreenSliderActivity.this);
+                .setOnSliderClickListener(this);
 
-        textSliderView.bundle(new Bundle());
-        textSliderView.getBundle().putString("extra", "image" + count);
-        mSlider.addSlider(textSliderView);
+        sliderView.bundle(new Bundle());
+        sliderView.getBundle().putString("extra", "image" + count);
+        mSlider.addSlider(sliderView);
     }
 
     @Override
@@ -79,6 +87,23 @@ public class FullScreenSliderActivity extends AppCompatActivity implements BaseS
     @Override
     public void onSliderClick(BaseSliderView slider) {
         //TODO: show/hide toolbar
-        Toast.makeText(FullScreenSliderActivity.this, slider.getBundle().get("extra") + "", Toast.LENGTH_SHORT).show();
+        Toast.makeText(FullScreenSliderActivity.this, "CLicked", Toast.LENGTH_SHORT).show();
+    }
+
+    private void showWindow(){
+        getWindow().getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+    }
+
+    private void hideWindow(){
+        getWindow().getDecorView().setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
     }
 }

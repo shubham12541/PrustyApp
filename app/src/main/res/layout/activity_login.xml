@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context="com.tominc.prustyapp.LoginActivity">
 
     <include
@@ -10,6 +11,7 @@
         layout="@layout/toolbar" />
 
     <RelativeLayout
+        android:id="@+id/login_items"
         android:padding="16dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -54,7 +56,25 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
+
     </RelativeLayout>
 
+
+    <!--<net.bohush.geometricprogressview.GeometricProgressView-->
+        <!--android:id="@+id/progress_bar"-->
+        <!--android:layout_centerInParent="true"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--app:gp_type="kite"-->
+        <!--android:visibility="gone"-->
+        <!--app:gp_number_of_angles="20"-->
+        <!--app:gp_color="@color/colorAccent"-->
+        <!--app:gp_duration="1000"-->
+        <!--app:gp_figure_padding="3dp" />-->
+
+    <include
+        android:id="@+id/logging_in"
+        android:visibility="gone"
+        layout="@layout/logging_in_layout" />
 
 </RelativeLayout>

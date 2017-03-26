@@ -316,7 +316,7 @@ public class AddProductActivity extends AppCompatActivity {
             super.onPostExecute(bitmap);
             images_bitmap.add(bitmap);
 //                    image.setImageBitmap(bmp);
-            SliderView imageSliderView = new SliderView(AddProductActivity.this);
+            SliderView imageSliderView = new SliderView(AddProductActivity.this, 1, "prodid");
             imageSliderView.setImage(bitmap);
 //                imageSliderView.setScaleType(BaseSliderView.ScaleType.CenterCrop);
             mSlider.addSlider(imageSliderView);

@@ -16,6 +16,7 @@ import android.graphics.Point;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.preference.MultiSelectListPreference;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -26,6 +27,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Display;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Animation;
@@ -55,13 +57,17 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.gson.Gson;
 import com.mikhaellopez.circularimageview.CircularImageView;
+import com.tominc.prustyapp.activities.FullScreenSliderActivity;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -101,6 +107,8 @@ public class ShowProductActivity extends AppCompatActivity {
     SharedPreferences mPrefs_user;
     private boolean iWantIt=false;
 
+    ArrayList<String> imagePaths;
+
     private final int PERMISSION_REQUSET = 13;
 
     User user;
@@ -121,7 +129,6 @@ public class ShowProductActivity extends AppCompatActivity {
         productName = (TextView) findViewById(R.id.show_product_name);
         productPrice = (TextView) findViewById(R.id.show_product_price);
         productDescription = (TextView) findViewById(R.id.show_product_description);
-        productWanted = (TextView) findViewById(R.id.show_product_views);
         profileCardFront = (LinearLayout) findViewById(R.id.profile_front);
         profileCardBack = (LinearLayout) findViewById(R.id.profile_back);
         cardRootLayout = (CardView) findViewById(R.id.profile_cards_root);
@@ -137,7 +144,7 @@ public class ShowProductActivity extends AppCompatActivity {
         share_email = (ImageView) findViewById(R.id.product_email);
         allItems = (ScrollView) findViewById(R.id.show_product_scroll);
 
-
+        imagePaths = new ArrayList<>();
 
         profileCardFront.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -161,10 +168,16 @@ public class ShowProductActivity extends AppCompatActivity {
         mSlider.setCustomIndicator((PagerIndicator) findViewById(R.id.show_image_indicator));
         mSlider.setCustomAnimation(new DescriptionAnimation());
         mSlider.setDuration(12000);
+        mSlider.stopAutoCycle();
+
 
         Intent in = getIntent();
         prod = (Product) in.getSerializableExtra("prod");
         mPrefs = getSharedPreferences(prod.getProductId(), MODE_PRIVATE);
+
+        SharedPreferences.Editor edit = mPrefs.edit();
+        edit.putInt("imageCount", prod.getImageCount());
+        edit.apply();
 
         mUser = FirebaseAuth.getInstance().getCurrentUser();
 
@@ -178,7 +191,7 @@ public class ShowProductActivity extends AppCompatActivity {
         String liked = mPrefs.getString(prod.getName(), null);
         if(liked!=null){
             iWantIt = true;
-            like_button.setImageResource(android.R.drawable.star_big_on);
+            like_button.setImageResource(R.drawable.ic_bookmark_black_24dp);
         }
 
         toolbar.setTitle(prod.getName().toUpperCase());
@@ -215,7 +228,6 @@ public class ShowProductActivity extends AppCompatActivity {
                 } else{
                     iWantIt=false;
                     unbookmarkProduct();
-                    like_button.setImageResource(android.R.drawable.star_big_off);
                     like_button.setImageResource(R.drawable.ic_bookmark_border_black_24dp);
 
                     SharedPreferences.Editor edit = mPrefs.edit();
@@ -261,7 +273,6 @@ public class ShowProductActivity extends AppCompatActivity {
                 startActivity(sendIntent);
             }
         });
-
     }
 
     private void downloadImagePermission(){
@@ -390,7 +401,7 @@ public class ShowProductActivity extends AppCompatActivity {
 
     private void addImagesToSlider(){
         for(int i=0;i<imagesBitmap.size();i++){
-            SliderView imageSliderView = new SliderView(ShowProductActivity.this);
+            SliderView imageSliderView = new SliderView(ShowProductActivity.this, i, prod.getProductId());
             imageSliderView.setImage(imagesBitmap.get(i));
             imageSliderView.setScaleType(BaseSliderView.ScaleType.CenterCrop);
             mSlider.addSlider(imageSliderView);
@@ -417,32 +428,26 @@ public class ShowProductActivity extends AppCompatActivity {
             final File tempFile2 = tempFile;
             final int finalI = i;
 
-            int counter=0;
-
             mStorage.getFile(tempFile2)
                     .addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
                         @Override
                         public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                            Bitmap bmp = null;
                             ImageView imageView = new ImageView(ShowProductActivity.this);
                             Glide.with(ShowProductActivity.this)
                                     .load(tempFile2)
                                     .into(imageView);
 
-                            imageView.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    Toast.makeText(ShowProductActivity.this, "Clicked on image " + finalI, Toast.LENGTH_SHORT).show();
-                                }
-                            });
-
-                            SliderView sliderView = new SliderView(ShowProductActivity.this);
+                            SliderView sliderView = new SliderView(ShowProductActivity.this, finalI, prod.getProductId());
                             sliderView.setScaleType(BaseSliderView.ScaleType.CenterCrop);
                             sliderView.setImage(BitmapFactory.decodeFile(tempFile2.toString()));
 
                             mSlider.addSlider(sliderView);
                             Log.d(TAG, "onSuccess: got image ");
-                            imagesBitmap.add(bmp);
+
+                            imagePaths.add(tempFile2.getAbsolutePath());
+                            SharedPreferences.Editor edit = mPrefs.edit();
+                            edit.putString("image"+finalI, tempFile2.toString());
+                            edit.apply();
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
@@ -622,6 +627,31 @@ public class ShowProductActivity extends AppCompatActivity {
         dialog.setCancelable(false);
         dialog.show();
 
+        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users").child(prod.getUserId());
+        userRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                User userData = dataSnapshot.getValue(User.class);
+                Log.d(TAG, "onDataChange: User: " + userData.toString());
+                HashMap<String, String> prodList = userData.getProductliked();
+                if(prodList != null){
+                    for(Map.Entry<String, String> product: prodList.entrySet()) {
+                        String prodId = product.getValue();
+                        if(prodId.equals(prod.getProductId())){
+                            DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("users").child(prod.getUserId());
+                            mRef.child("productliked").child(product.getKey()).removeValue();
+                        }
+                    }
+                }
+                dialog.dismiss();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
         DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("users").child(prod.getUserId());
         mRef.child("productliked").child(prod.getProductId()).removeValue();
 
@@ -639,7 +669,6 @@ public class ShowProductActivity extends AppCompatActivity {
         try {
             tempFile = File.createTempFile("images", "jpg");
 
-
             mProfileRef.getFile(tempFile)
                     .addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
                         @Override
@@ -653,9 +682,10 @@ public class ShowProductActivity extends AppCompatActivity {
                         @Override
                         public void onFailure(@NonNull Exception e) {
                             Log.d(TAG, "onFailure: Profile image could not be downloaded " + e.toString());
-                            Glide.with(ShowProductActivity.this)
-                                    .load(R.drawable.ic_male_avatar)
-                                    .into(profile_pic);
+                            // Male Avatar is already in the view
+//                            Glide.with(ShowProductActivity.this)
+//                                    .load(R.drawable.ic_male_avatar)
+//                                    .into(profile_pic);
                         }
                     });
 

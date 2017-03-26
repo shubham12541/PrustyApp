@@ -59,8 +59,8 @@ public class LoginActivity extends AppCompatActivity {
     Button submit;
     Toolbar toolbar;
 
-//    ProgressBar pb;
-    GeometricProgressView pb;
+//    GeometricProgressView pb;
+    View pb;
     RelativeLayout allLoginItems;
 
     private final String LOGIN_URL = Config.BASE_URL + "login.php";
@@ -79,7 +79,7 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        pb = (GeometricProgressView) findViewById(R.id.progress_bar);
+        pb =  findViewById(R.id.logging_in);
         allLoginItems = (RelativeLayout) findViewById(R.id.login_items);
 
         validator.setContext(this);

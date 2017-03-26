@@ -47,7 +47,8 @@ public class ProductLIstedFragment extends Fragment {
     ProductRecyclerViewAdapter adapter;
     ArrayList<Product> items = new ArrayList<>();
     private final String PRODUCT_LISTED_URL = Config.BASE_URL + "product_by_user.php";
-    ProgressBar pb;
+    View pb;
+    View noDataFound;
 
     private final String TAG = "ProductListFragment";
 
@@ -81,7 +82,8 @@ public class ProductLIstedFragment extends Fragment {
         FirebaseUser mUser = FirebaseAuth.getInstance().getCurrentUser();
         mRef = FirebaseDatabase.getInstance().getReference("users").child(mUser.getUid());
 
-        pb = (ProgressBar) root.findViewById(R.id.product_progress);
+        pb =  root.findViewById(R.id.loading_data);
+        noDataFound = root.findViewById(R.id.no_data_found);
 
         recyclerView = (RecyclerView) root.findViewById(R.id.product_liked_recycler);
         recyclerView.setHasFixedSize(true);
@@ -108,6 +110,9 @@ public class ProductLIstedFragment extends Fragment {
 //                ArrayList<String> prodList = userData.getProductAdded();
                 if(prodList != null){
                     fetchProductsFromList(prodList);
+                } else{
+                    noDataFound.setVisibility(View.VISIBLE);
+                    pb.setVisibility(View.GONE);
                 }
             }
 
@@ -172,5 +177,7 @@ public class ProductLIstedFragment extends Fragment {
     }
 
     //TODO: create no data found layout XML and add it whwn required.
+
+    // TODO: create logging in layout
 
 }

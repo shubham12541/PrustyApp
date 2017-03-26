@@ -30,6 +30,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -44,7 +45,7 @@ import de.mateware.snacky.Snacky;
  */
 public class Fragment1 extends Fragment {
 
-    ProgressBar pb;
+    View pb;
     User user;
     RecyclerView recyclerView;
     StaggeredGridLayoutManager staggeredGridLayoutManager;
@@ -53,6 +54,8 @@ public class Fragment1 extends Fragment {
     ProductRecyclerViewAdapter adapter;
     RequestQueue rq;
     RelativeLayout allItems;
+
+    View noDataFoundView;
 
     DatabaseReference mRef;
 
@@ -109,8 +112,9 @@ public class Fragment1 extends Fragment {
         items = new ArrayList<>();
         rq = Volley.newRequestQueue(getActivity());
 
-        pb = (ProgressBar) root.findViewById(R.id.product_progress);
+        pb =  root.findViewById(R.id.loading_data);
         allItems = (RelativeLayout) root.findViewById(R.id.fragment1_items);
+
         pb.setVisibility(View.VISIBLE);
 
 //        final GridView list;
@@ -130,6 +134,9 @@ public class Fragment1 extends Fragment {
             }
         });
 
+        noDataFoundView = root.findViewById(R.id.fragment1_no_data);
+        noDataFoundView.setVisibility(View.GONE);
+
         recyclerView = (RecyclerView) root.findViewById(R.id.recycler_view);
         recyclerView.setHasFixedSize(true);
         staggeredGridLayoutManager = new StaggeredGridLayoutManager(2, 1);
@@ -143,6 +150,8 @@ public class Fragment1 extends Fragment {
     }
 
     public void getAllProducts(){
+        items.clear();
+        adapter.notifyDataSetChanged();
         pb.setVisibility(View.VISIBLE);
         final ArrayList<Product> products = new ArrayList<>();
         ChildEventListener childEventListener = new ChildEventListener() {
@@ -164,6 +173,8 @@ public class Fragment1 extends Fragment {
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
                 Log.d(TAG, "onChildChanged: Product changed");
+
+                adapter.notifyDataSetChanged();
                 pb.setVisibility(View.GONE);
             }
 
@@ -202,6 +213,21 @@ public class Fragment1 extends Fragment {
         };
 
         mRef.addChildEventListener(childEventListener);
+
+        mRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(items.size()==0){
+                    noDataFoundView.setVisibility(View.VISIBLE);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.d(TAG, "onCancelled: No value loaded");
+            }
+        });
+
     }
 
 }

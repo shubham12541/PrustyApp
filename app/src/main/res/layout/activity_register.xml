@@ -11,6 +11,10 @@
         android:id="@+id/register_toolbar"
         layout="@layout/toolbar" />
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
     <ScrollView
         android:layout_marginTop="16dp"
         android:padding="16dp"
@@ -18,6 +22,7 @@
         android:layout_height="wrap_content">
 
         <LinearLayout
+            android:id="@+id/register_items"
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
@@ -30,7 +35,7 @@
 
                 <com.mikhaellopez.circularimageview.CircularImageView
                     android:id="@+id/register_image"
-                    android:src="@drawable/material"
+                    android:src="@drawable/ic_male_avatar"
                     android:layout_width="100dp"
                     android:layout_height="100dp"
                     app:civ_border_color="#EEEEEE"
@@ -145,4 +150,23 @@
 
         </LinearLayout>
     </ScrollView>
+
+        <!--<net.bohush.geometricprogressview.GeometricProgressView-->
+            <!--android:id="@+id/progress_bar"-->
+            <!--android:layout_centerInParent="true"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--app:gp_type="kite"-->
+            <!--app:gp_number_of_angles="20"-->
+            <!--app:gp_color="@color/colorAccent"-->
+            <!--app:gp_duration="1000"-->
+            <!--app:gp_figure_padding="3dp" />-->
+
+        <include
+            android:id="@+id/logging_in"
+            android:visibility="gone"
+            layout="@layout/logging_in_layout" />
+
+    </RelativeLayout>
+
 </LinearLayout>
