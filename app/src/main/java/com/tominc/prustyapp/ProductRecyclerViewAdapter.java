@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 
 import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -66,21 +67,26 @@ public class ProductRecyclerViewAdapter extends RecyclerView.Adapter<ProductView
         FirebaseUser mUser = FirebaseAuth.getInstance().getCurrentUser();
         mStorage = FirebaseStorage.getInstance().getReference("ProductImages")
                 .child(items.get(position).getProductId())
-                .child("images/1.jpg");
+                .child("images/0.jpg");
+
+        holder.pb.setVisibility(View.VISIBLE);
 
         mStorage.getFile(localFile)
                 .addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
                     @Override
                     public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                        holder.pb.setVisibility(View.GONE);
                         Glide.with(c)
                                 .load(localFile)
                                 .into(holder.image);
+
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Log.e(TAG, "onFailure: File could not be downloaded or available " + e.toString());
+                        holder.pb.setVisibility(View.GONE);
                         Glide.with(c)
                                 .load(R.drawable.ic_not_available)
                                 .into(holder.image);

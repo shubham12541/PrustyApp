@@ -199,38 +199,38 @@ public class LoginActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         Log.d(TAG, "onComplete: User Signed In");
-                        defaultView();
                         if(!task.isSuccessful()){
+                            defaultView();
                             try{
                                 throw task.getException();
                             } catch (FirebaseAuthInvalidCredentialsException e) {
 //                                Toast.makeText(LoginActivity.this, "Either email or password is inccorrect", Toast.LENGTH_SHORT).show();
-                                Snacky.builder().setView(allLoginItems)
+                                Snacky.builder()
                                         .setActivty(LoginActivity.this)
                                         .setText(R.string.email_pass_incorrect_error)
                                         .setDuration(Snacky.LENGTH_SHORT)
-                                        .error();
+                                        .error()
+                                        .show();
                                 LoginActivity.this.email.requestFocus();
                             } catch (FirebaseAuthInvalidUserException e){
 //                                Toast.makeText(LoginActivity.this, "Invalid Username", Toast.LENGTH_SHORT).show();
-                                Snacky.builder().setView(allLoginItems)
+                                Snacky.builder()
                                         .setActivty(LoginActivity.this)
                                         .setText(R.string.invalid_username_error)
                                         .setDuration(Snacky.LENGTH_SHORT)
-                                        .error();
+                                        .error()
+                                        .show();
                             } catch (Exception e) {
 //                                Toast.makeText(LoginActivity.this, "Authentication Failed", Toast.LENGTH_SHORT).show();
-                                Snacky.builder().setView(allLoginItems)
+                                Snacky.builder()
                                         .setActivty(LoginActivity.this)
                                         .setText(R.string.auth_failed_error)
                                         .setDuration(Snacky.LENGTH_SHORT)
-                                        .error();
+                                        .error()
+                                        .show();
                                 e.printStackTrace();
                             }
-                            return;
                         }
-                        String userId = task.getResult().getUser().getUid();
-//                        successfulLogin(userId);
                     }
                 });
     }
@@ -244,6 +244,7 @@ public class LoginActivity extends AppCompatActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Log.d(TAG, "onDataChange: " + dataSnapshot.toString());
                 User user = dataSnapshot.getValue(User.class);
+                Log.d(TAG, "onDataChange: " + user.toString());
                 if(user!=null) {
                     Log.d(TAG, "onDataChange: Got user info " + user.toString());
 
@@ -258,6 +259,8 @@ public class LoginActivity extends AppCompatActivity {
 //                                  in.putExtra("user", user);
                     startActivity(in);
                     finish();
+                } else{
+                    Log.d(TAG, "onDataChange: user logged in annoymously");
                 }
             }
 

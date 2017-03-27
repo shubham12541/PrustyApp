@@ -80,6 +80,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import de.mateware.snacky.Snacky;
+import es.dmoral.toasty.Toasty;
 
 public class ShowProductActivity extends AppCompatActivity {
     RelativeLayout sliderLayout;
@@ -203,8 +204,25 @@ public class ShowProductActivity extends AppCompatActivity {
         productPrice.setText("Price: Rs. " + prod.getPrice());
         productDescription.setText(prod.getDescription());
 //        productWanted.setText("Wanted: " + prod.getWanted());
-        profileName.setText(user.getName());
-        profileEmail.setText(user.getEmail());
+
+        DatabaseReference mProdUser = FirebaseDatabase.getInstance().getReference("users").child(prod.getUserId());
+
+        mProdUser.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                User prodUser = dataSnapshot.getValue(User.class);
+                profileName.setText(prodUser.getName());
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.d(TAG, "onCancelled: unable to load user");
+                Toasty.error(ShowProductActivity.this, "Unable to load user data", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+//        profileName.setText(prod.getName());
+        profileEmail.setText(prod.getEmail());
         profilePhone.setText(prod.getPhone());
         profileCollege.setText("Year " + prod.getYear() + ", " + prod.getCollege());
 
@@ -216,23 +234,12 @@ public class ShowProductActivity extends AppCompatActivity {
             public void onClick(View view) {
 //                updateWanted();
                 if(!iWantIt){
-                    iWantIt = true;
                     bookmarkProduct();
-                    like_button.setImageResource(R.drawable.ic_bookmark_black_24dp);
-//                    like_button.setImageResource(android.R.drawable.star_big_on);
 
-                    SharedPreferences.Editor edit = mPrefs.edit();
-                    edit.putString(prod.getName(), "y");
-                    edit.apply();
 
                 } else{
-                    iWantIt=false;
                     unbookmarkProduct();
-                    like_button.setImageResource(R.drawable.ic_bookmark_border_black_24dp);
 
-                    SharedPreferences.Editor edit = mPrefs.edit();
-                    edit.putString(prod.getName(), null);
-                    edit.apply();
                 }
             }
         });
@@ -432,22 +439,24 @@ public class ShowProductActivity extends AppCompatActivity {
                     .addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
                         @Override
                         public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                            ImageView imageView = new ImageView(ShowProductActivity.this);
-                            Glide.with(ShowProductActivity.this)
-                                    .load(tempFile2)
-                                    .into(imageView);
+                            if(!ShowProductActivity.this.isDestroyed()){
+                                ImageView imageView = new ImageView(ShowProductActivity.this);
+                                Glide.with(ShowProductActivity.this)
+                                        .load(tempFile2)
+                                        .into(imageView);
 
-                            SliderView sliderView = new SliderView(ShowProductActivity.this, finalI, prod.getProductId());
-                            sliderView.setScaleType(BaseSliderView.ScaleType.CenterCrop);
-                            sliderView.setImage(BitmapFactory.decodeFile(tempFile2.toString()));
+                                SliderView sliderView = new SliderView(ShowProductActivity.this, finalI, prod.getProductId());
+                                sliderView.setScaleType(BaseSliderView.ScaleType.CenterCrop);
+                                sliderView.setImage(BitmapFactory.decodeFile(tempFile2.toString()));
 
-                            mSlider.addSlider(sliderView);
-                            Log.d(TAG, "onSuccess: got image ");
+                                mSlider.addSlider(sliderView);
+                                Log.d(TAG, "onSuccess: got image ");
 
-                            imagePaths.add(tempFile2.getAbsolutePath());
-                            SharedPreferences.Editor edit = mPrefs.edit();
-                            edit.putString("image"+finalI, tempFile2.toString());
-                            edit.apply();
+                                imagePaths.add(tempFile2.getAbsolutePath());
+                                SharedPreferences.Editor edit = mPrefs.edit();
+                                edit.putString("image"+finalI, tempFile2.toString());
+                                edit.apply();
+                            }
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
@@ -457,154 +466,6 @@ public class ShowProductActivity extends AppCompatActivity {
                         }
                     });
         }
-    }
-
-
-    private class DownloadImages extends AsyncTask<Void, Void, Void>{
-        int imageCount;
-        String userName;
-        String productName;
-
-        public DownloadImages(int imageCount, String userName, String productName) {
-            this.imageCount = imageCount;
-            this.userName = userName;
-            this.productName = productName;
-        }
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            Log.d(TAG, "doInBackground: Download images");
-            File tempFile;
-            for(int i=0;i<imageCount;i++){
-                try {
-                    tempFile = File.createTempFile("images", "jpg");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    continue;
-                }
-                mStorage = FirebaseStorage.getInstance().getReference("ProductImages")
-                        .child(mUser.getUid())
-                        .child(prod.getProductId())
-                        .child("images/" + i + ".jpg");
-
-                int[] dimen = getImageDimensions();
-                final int width = dimen[0];
-                final int height = dimen[1];
-
-                final File tempFile2 = tempFile;
-                final int finalI = i;
-
-                int counter=0;
-
-                mStorage.getFile(tempFile2)
-                        .addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
-                            @Override
-                            public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                                Bitmap bmp = null;
-                                try {
-                                    bmp = Glide.with(getApplicationContext())
-                                            .load(tempFile2)
-                                            .asBitmap()
-                                            .centerCrop()
-                                            .into(width, height)
-                                            .get();
-                                    Log.d(TAG, "onSuccess: got image ");
-                                } catch (InterruptedException e) {
-                                    e.printStackTrace();
-                                } catch (ExecutionException e) {
-                                    e.printStackTrace();
-                                }
-                                imagesBitmap.add(bmp);
-                            }
-                        })
-                        .addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Log.e(TAG, "onFailure: Image could not downloaded" + e.toString() );
-                            }
-                        });
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            Log.d(TAG, "onPostExecute: All Downloads Done");
-            addImagesToSlider();
-        }
-    }
-
-    //true: increase
-    //false: decrease
-    private void updateWanted(){
-        RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
-        final ProgressDialog dialog = new ProgressDialog(ShowProductActivity.this);
-        dialog.setMessage("Updating...");
-        dialog.setCancelable(false);
-        dialog.show();
-        StringRequest request = new StringRequest(Request.Method.POST, UPDATE_WANTED_URL, new Response.Listener<String>() {
-            @Override
-            public void onResponse(String s) {
-                try {
-                    Log.d("UpdatingWanged", s);
-                    JSONObject jsonObject = new JSONObject(s);
-                    String res = jsonObject.getString("status");
-                    if (res.equals("done")) {
-                        String new_wanted = jsonObject.getString("wanted");
-                        productWanted.setText("Wanted: " + new_wanted);
-                        if(!iWantIt){
-                            iWantIt = true;
-                            like_button.setImageResource(android.R.drawable.star_big_on);
-
-                            SharedPreferences.Editor edit = mPrefs.edit();
-                            edit.putString(prod.getName(), "y");
-                            edit.apply();
-
-                        } else{
-                            iWantIt=false;
-                            like_button.setImageResource(android.R.drawable.star_big_off);
-                            SharedPreferences.Editor edit = mPrefs.edit();
-                            edit.putString(prod.getName(), null);
-                            edit.apply();
-                        }
-                        Log.e("Update Wanted", "done");
-                        dialog.dismiss();
-                    } else {
-                        dialog.dismiss();
-                        Toast.makeText(getApplicationContext(), "Failed", Toast.LENGTH_SHORT).show();
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    dialog.dismiss();
-
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError volleyError) {
-                Toast.makeText(getApplicationContext(), "No Connection", Toast.LENGTH_SHORT).show();
-                dialog.dismiss();
-            }
-        }) {
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                Map<String, String> params = new HashMap<>();
-                params.put("id", prod.getProductId());
-                params.put("email", user.getEmail());
-                String what;
-                if(!iWantIt){
-                    what="inc";
-                } else{
-                    what="dec";
-                }
-                params.put("what", what);
-                return params;
-            }
-        };
-
-        queue.add(request);
-
     }
 
     private void bookmarkProduct(){
@@ -617,6 +478,14 @@ public class ShowProductActivity extends AppCompatActivity {
 
         String productID = prod.getProductId();
         mRef.child("productliked").push().setValue(productID);
+
+        iWantIt = true;
+        like_button.setImageResource(R.drawable.ic_bookmark_black_24dp);
+//                    like_button.setImageResource(android.R.drawable.star_big_on);
+
+        SharedPreferences.Editor edit = mPrefs.edit();
+        edit.putString(prod.getName(), "y");
+        edit.apply();
 
         dialog.dismiss();
     }
@@ -640,6 +509,12 @@ public class ShowProductActivity extends AppCompatActivity {
                         if(prodId.equals(prod.getProductId())){
                             DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("users").child(prod.getUserId());
                             mRef.child("productliked").child(product.getKey()).removeValue();
+                            iWantIt=false;
+                            like_button.setImageResource(R.drawable.ic_bookmark_border_black_24dp);
+
+                            SharedPreferences.Editor edit = mPrefs.edit();
+                            edit.putString(prod.getName(), null);
+                            edit.apply();
                         }
                     }
                 }
@@ -662,7 +537,7 @@ public class ShowProductActivity extends AppCompatActivity {
         StorageReference mProfileRef = FirebaseStorage
                 .getInstance()
                 .getReference("profiles")
-                .child("images/" + mUser.getUid() + "/profile.jpg");
+                .child("images/" + prod.getUserId() + "/profile.jpg");
 
 
         final File tempFile;
@@ -673,9 +548,11 @@ public class ShowProductActivity extends AppCompatActivity {
                     .addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
                         @Override
                         public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                            Glide.with(ShowProductActivity.this)
-                                    .load(tempFile)
-                                    .into(profile_pic);
+                            if(!ShowProductActivity.this.isDestroyed()){
+                                Glide.with(ShowProductActivity.this)
+                                        .load(tempFile)
+                                        .into(profile_pic);
+                            }
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {

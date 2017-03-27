@@ -10,7 +10,16 @@ import java.util.ArrayList;
  * Created by shubham on 14/1/16.
  */
 public class Product implements Serializable{
-    private String name, phone, year, college, productId, description, userId;
+    private String name, phone, year, college, productId, description, userId, email;
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
     private int imageCount, price;
 //    private String name;
 //    private String price;

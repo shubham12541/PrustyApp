@@ -91,9 +91,11 @@ public class ProfileFragment extends Fragment {
                     .addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
                         @Override
                         public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                            Glide.with(getActivity())
-                                    .load(tempFile)
-                                    .into(profile_image);
+                            if(!getActivity().isDestroyed()){
+                                Glide.with(getActivity())
+                                        .load(tempFile)
+                                        .into(profile_image);
+                            }
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
@@ -115,6 +117,5 @@ public class ProfileFragment extends Fragment {
         return root;
 
     }
-
 
 }

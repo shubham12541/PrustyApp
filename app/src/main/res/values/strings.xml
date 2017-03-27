@@ -16,6 +16,16 @@
     <string name="error_invalid_email">Invalid email ID</string>
     <string name="error_user_exists">Email already registed</string>
 
+    <string name="user_creation_error">Unable to create user</string>
+    <string name="authentication_error">Authentication Failed</string>
+    <string name="fill_details_warning">Fill all details</string>
+    <string name="password_mismatch_warning">Password donot match</string>
+    <string name="permission_warning">Permission required to upload Pic</string>
+    <string name="annon_user_auth_error">Annonymous User Authentication Failed</string>
+    <string name="email_pass_incorrect_error">Either E-mail or password incorrect</string>
+    <string name="invalid_username_error">Invalid Username</string>
+    <string name="auth_failed_error">Authentication Failed</string>
+    <string name="product_get_failed_error">Failed to get all products</string>
 
     <string name="temp">This is a real story of a young college girl who passed away last month in Coimbatore
 

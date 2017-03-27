@@ -76,7 +76,7 @@ public class ProductListAdapter extends BaseAdapter {
         if(no_images==0){
             pic.setImageResource(R.drawable.material);
         } else{
-//            String madeUrl = IMAGE_DOWNLOAD_BASE + items.get(i).getEmail() + "/" + items.get(i).getName()+"/image1.png";
+//            String madeUrl = IMAGE_DOWNLOAD_BASE + items.get(i).getEmail() + "/" + items.get(i).getName()+"/image0.png";
 
 //            Glide.with(c)
 //                    .load(madeUrl)

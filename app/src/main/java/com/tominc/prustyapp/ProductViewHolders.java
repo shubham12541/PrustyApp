@@ -9,6 +9,8 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import net.bohush.geometricprogressview.GeometricProgressView;
+
 import java.util.ArrayList;
 
 /**
@@ -18,6 +20,7 @@ public class ProductViewHolders extends RecyclerView.ViewHolder implements View.
     public TextView name;
     public TextView price;
     public ImageView image;
+    public GeometricProgressView pb;
     ArrayList<Product> items;
 
 
@@ -28,6 +31,7 @@ public class ProductViewHolders extends RecyclerView.ViewHolder implements View.
         name = (TextView) itemView.findViewById(R.id.product_name);
         price = (TextView) itemView.findViewById(R.id.product_cost);
         image = (ImageView) itemView.findViewById(R.id.product_pic);
+        pb = (GeometricProgressView) itemView.findViewById(R.id.progress_bar);
 
         CardView card = (CardView) itemView.findViewById(R.id.list_item_card);
         card.setOnClickListener(this);

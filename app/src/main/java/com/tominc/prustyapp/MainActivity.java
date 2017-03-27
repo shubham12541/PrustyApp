@@ -85,11 +85,25 @@ public class MainActivity extends AppCompatActivity
         TextView nName= (TextView) view.findViewById(R.id.nav_header_name);
         TextView nEmail = (TextView) view.findViewById(R.id.nav_header_email);
         ImageView nPic = (ImageView) view.findViewById(R.id.imageView);
-        nName.setText(user.getName());
-        nEmail.setText(user.getEmail());
+
+        if(user != null){
+            nName.setText(user.getName());
+            nEmail.setText(user.getEmail());
+        }
+
+        FirebaseAuth.AuthStateListener authStateListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser mUser = firebaseAuth.getCurrentUser();
+                if(user==null){
+                    Intent in = new Intent(MainActivity.this, LoginActivity.class);
+                    startActivity(in);
+                    finish();
+                }
+            }
+        };
 
         mAuth.addAuthStateListener(authStateListener);
-
     }
 
     @Override
@@ -191,15 +205,5 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    FirebaseAuth.AuthStateListener authStateListener = new FirebaseAuth.AuthStateListener() {
-        @Override
-        public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-            FirebaseUser mUser = firebaseAuth.getCurrentUser();
-            if(user==null){
-                Intent in = new Intent(MainActivity.this, LoginActivity.class);
-                startActivity(in);
-                finish();
-            }
-        }
-    };
+
 }

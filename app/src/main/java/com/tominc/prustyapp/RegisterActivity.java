@@ -58,6 +58,7 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.google.gson.Gson;
 import com.mikhaellopez.circularimageview.CircularImageView;
+import com.tominc.prustyapp.utilities.ImageCompression;
 
 import net.bohush.geometricprogressview.GeometricProgressView;
 
@@ -72,6 +73,7 @@ import java.util.Map;
 import de.mateware.snacky.Snacky;
 
 public class RegisterActivity extends AppCompatActivity {
+    //TODO: Register should be divided into multiple pages
     EditText f_name, l_name, email, pass, c_pass, phone, college, year;
     Button submit, clear;
     CircularImageView profile_image;
@@ -133,6 +135,7 @@ public class RegisterActivity extends AppCompatActivity {
         submit = (Button) findViewById(R.id.register_submit);
         clear = (Button) findViewById(R.id.register_clear);
         pb =  findViewById(R.id.logging_in);
+        allRegisterItems = (LinearLayout) findViewById(R.id.register_items);
 
         validator.addValidation(RegisterActivity.this, R.id.register_f_name, "[a-zA-Z\\s]+", R.string.first_name_validation);
         validator.addValidation(RegisterActivity.this, R.id.register_l_name, "[a-zA-Z\\s]+", R.string.last_name_validation);
@@ -182,22 +185,24 @@ public class RegisterActivity extends AppCompatActivity {
                             || s_phone.length() == 0 || s_c_pass.length() == 0 || s_college.length() == 0
                             || s_year.length()==0) {
 //                        Toast.makeText(getApplicationContext(), "Fill all details", Toast.LENGTH_SHORT).show();
-                        Snacky.builder().setView(allRegisterItems)
+                        Snacky.builder()
                                 .setActivty(RegisterActivity.this)
                                 .setText(R.string.fill_details_warning)
                                 .setDuration(Snacky.LENGTH_SHORT)
-                                .error();
+                                .error()
+                                .show();
                     } else {
                         if (s_pass.equals(s_c_pass)) {
                             logingInView();
                             addUser(s_name, s_email, s_pass, s_college, s_phone, s_year);
                         } else {
 //                            Toast.makeText(getApplicationContext(), "Password donot match", Toast.LENGTH_SHORT).show();
-                            Snacky.builder().setView(allRegisterItems)
+                            Snacky.builder()
                                     .setActivty(RegisterActivity.this)
                                     .setText(R.string.password_mismatch_warning)
                                     .setDuration(Snacky.LENGTH_SHORT)
-                                    .error();
+                                    .error()
+                                    .show();
                         }
                     }
                 }
@@ -228,11 +233,12 @@ public class RegisterActivity extends AppCompatActivity {
                 } else{
 //                    Toast.makeText(getApplicationContext(), "Permisston required to upload pic", Toast.LENGTH_SHORT)
 //                            .show();
-                    Snacky.builder().setView(allRegisterItems)
+                    Snacky.builder()
                             .setActivty(RegisterActivity.this)
                             .setText(R.string.permission_warning)
                             .setDuration(Snacky.LENGTH_SHORT)
-                            .warning();
+                            .warning()
+                            .show();
                     defaultView();
                 }
                 return;
@@ -247,22 +253,17 @@ public class RegisterActivity extends AppCompatActivity {
             if(resultCode == RESULT_OK){
                 Uri selectedImage = data.getData();
                 profilePic = selectedImage;
-                try {
-                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), selectedImage);
+                    ImageCompression compress = new ImageCompression(RegisterActivity.this);
+                    Bitmap bitmap = compress.compressImage(selectedImage.toString());
+//                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), selectedImage);
 //                    Bitmap bitmap = BitmapFactory.decodeFile(imgDecoableString);
-                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bos);
-                    int height = bitmap.getHeight();
-                    int width = bitmap.getWidth();
-                    Bitmap bmp = Bitmap.createScaledBitmap(bitmap, 100, 100, true);
+//                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+//                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bos);
+//                    int height = bitmap.getHeight();
+//                    int width = bitmap.getWidth();
+//                    Bitmap bmp = Bitmap.createScaledBitmap(bitmap, 100, 100, true);
 
-                    profile_image.setImageBitmap(bmp);
-
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    defaultView();
-                }
+                    profile_image.setImageBitmap(bitmap);
             }
         }
     }
@@ -276,22 +277,35 @@ public class RegisterActivity extends AppCompatActivity {
 
                         if(!task.isSuccessful()){
 //                            Toast.makeText(RegisterActivity.this, "Unable to add user ", Toast.LENGTH_SHORT).show();
-                            Snacky.builder().setView(allRegisterItems)
-                                    .setActivty(RegisterActivity.this)
-                                    .setText(R.string.user_creation_error)
-                                    .setDuration(Snacky.LENGTH_SHORT)
-                                    .error();
                             Log.d(TAG, "onComplete: " + task.getException());
                             try {
                                 throw task.getException();
                             } catch(FirebaseAuthWeakPasswordException e) {
-                                RegisterActivity.this.pass.setError(getString(R.string.error_weak_password));
+//                                RegisterActivity.this.pass.setError(getString(R.string.error_weak_password));
+                                Snacky.builder()
+                                        .setActivty(RegisterActivity.this)
+                                        .setText(R.string.error_weak_password)
+                                        .setDuration(Snacky.LENGTH_SHORT)
+                                        .error()
+                                        .show();
                                 RegisterActivity.this.pass.requestFocus();
                             } catch(FirebaseAuthInvalidCredentialsException e) {
-                                RegisterActivity.this.email.setError(getString(R.string.error_invalid_email));
+//                                RegisterActivity.this.email.setError(getString(R.string.error_invalid_email));
+                                Snacky.builder()
+                                        .setActivty(RegisterActivity.this)
+                                        .setText(R.string.error_invalid_email)
+                                        .setDuration(Snacky.LENGTH_SHORT)
+                                        .error()
+                                        .show();
                                 RegisterActivity.this.email.requestFocus();
                             } catch(FirebaseAuthUserCollisionException e) {
-                                RegisterActivity.this.email.setError(getString(R.string.error_user_exists));
+//                                RegisterActivity.this.email.setError(getString(R.string.error_user_exists));
+                                Snacky.builder()
+                                        .setActivty(RegisterActivity.this)
+                                        .setText(R.string.error_user_exists)
+                                        .setDuration(Snacky.LENGTH_SHORT)
+                                        .error()
+                                        .show();
                                 RegisterActivity.this.email.requestFocus();
                             } catch(Exception e) {
                                 Log.e(TAG, e.getMessage());
@@ -358,6 +372,7 @@ public class RegisterActivity extends AppCompatActivity {
                         user.setCollege(college);
                         user.setPhone(phone);
                         user.setYear(year);
+                        user.setEmail(RegisterActivity.this.email.getText().toString());
                         user.setUserId(userId);
 
                         mRefs.child(userId).setValue(user);
@@ -381,11 +396,12 @@ public class RegisterActivity extends AppCompatActivity {
                     @Override
                     public void onFailure(@NonNull Exception e) {
 //                        Toast.makeText(RegisterActivity.this, "Authentication Failed", Toast.LENGTH_SHORT).show();
-                        Snacky.builder().setView(allRegisterItems)
+                        Snacky.builder()
                                 .setActivty(RegisterActivity.this)
-                                .setText(R.string.authentication_error)
+                                .setText(R.string.user_creation_error)
                                 .setDuration(Snacky.LENGTH_SHORT)
-                                .error();
+                                .error()
+                                .show();
                         defaultView();
                     }
                 });
