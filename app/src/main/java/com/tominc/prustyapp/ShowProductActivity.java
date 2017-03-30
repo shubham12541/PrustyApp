@@ -1,6 +1,5 @@
 package com.tominc.prustyapp;
 
-import android.*;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -15,8 +14,6 @@ import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
-import android.os.AsyncTask;
-import android.preference.MultiSelectListPreference;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -40,19 +37,12 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.AuthFailureError;
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
 import com.daimajia.slider.library.Animations.DescriptionAnimation;
 import com.daimajia.slider.library.Indicators.PagerIndicator;
 import com.daimajia.slider.library.SliderLayout;
 import com.daimajia.slider.library.SliderTypes.BaseSliderView;
+import com.github.ybq.android.spinkit.SpinKitView;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -67,17 +57,12 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.gson.Gson;
 import com.mikhaellopez.circularimageview.CircularImageView;
-import com.tominc.prustyapp.activities.FullScreenSliderActivity;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 import de.mateware.snacky.Snacky;
 import es.dmoral.toasty.Toasty;
@@ -120,6 +105,9 @@ public class ShowProductActivity extends AppCompatActivity {
     StorageReference mStorage;
     FirebaseUser mUser;
 
+    SpinKitView profile_pb, images_pb;
+    View profile_pb_background;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -127,6 +115,9 @@ public class ShowProductActivity extends AppCompatActivity {
 
         toolbar = (Toolbar) findViewById(R.id.show_product_toolbar);
 
+        profile_pb = (SpinKitView) findViewById(R.id.loading);
+        profile_pb_background = findViewById(R.id.loading_background);
+        images_pb = (SpinKitView) findViewById(R.id.loading_images);
         productName = (TextView) findViewById(R.id.show_product_name);
         productPrice = (TextView) findViewById(R.id.show_product_price);
         productDescription = (TextView) findViewById(R.id.show_product_description);
@@ -144,6 +135,9 @@ public class ShowProductActivity extends AppCompatActivity {
         share_message = (ImageView) findViewById(R.id.product_message);
         share_email = (ImageView) findViewById(R.id.product_email);
         allItems = (ScrollView) findViewById(R.id.show_product_scroll);
+
+        showProfileLoading();
+        showLoadingImages();
 
         imagePaths = new ArrayList<>();
 
@@ -227,7 +221,13 @@ public class ShowProductActivity extends AppCompatActivity {
         profileCollege.setText("Year " + prod.getYear() + ", " + prod.getCollege());
 
 //        new DownloadImages(prod.getImageCount(), prod.getEmail(), prod.getName()).execute();
-        downloadImagePermission();
+
+        if(prod.getImageCount() == 0){
+            hideLoadingImages();
+            ((ImageView) findViewById(R.id.no_images)).setVisibility(View.VISIBLE);
+        } else{
+            downloadImagePermission();
+        }
 
         like_button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -440,6 +440,7 @@ public class ShowProductActivity extends AppCompatActivity {
                         @Override
                         public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
                             if(!ShowProductActivity.this.isDestroyed()){
+                                hideLoadingImages();
                                 ImageView imageView = new ImageView(ShowProductActivity.this);
                                 Glide.with(ShowProductActivity.this)
                                         .load(tempFile2)
@@ -549,6 +550,7 @@ public class ShowProductActivity extends AppCompatActivity {
                         @Override
                         public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
                             if(!ShowProductActivity.this.isDestroyed()){
+                                hideProfileLoading();
                                 Glide.with(ShowProductActivity.this)
                                         .load(tempFile)
                                         .into(profile_pic);
@@ -559,9 +561,10 @@ public class ShowProductActivity extends AppCompatActivity {
                         @Override
                         public void onFailure(@NonNull Exception e) {
                             Log.d(TAG, "onFailure: Profile image could not be downloaded " + e.toString());
+                            hideProfileLoading();
                             // Male Avatar is already in the view
 //                            Glide.with(ShowProductActivity.this)
-//                                    .load(R.drawable.ic_male_avatar)
+//                                 s   .load(R.drawable.ic_male_avatar)
 //                                    .into(profile_pic);
                         }
                     });
@@ -596,5 +599,24 @@ public class ShowProductActivity extends AppCompatActivity {
         intentsms.putExtra("address", "+91" + prod.getPhone());
         startActivity( intentsms );
     }
+
+    private void showProfileLoading(){
+        profile_pb.setVisibility(View.VISIBLE);
+        profile_pb_background.setVisibility(View.VISIBLE);
+    }
+
+    private void hideProfileLoading(){
+        profile_pb.setVisibility(View.GONE);
+        profile_pb_background.setVisibility(View.GONE);
+    }
+
+    private void showLoadingImages(){
+        images_pb.setVisibility(View.VISIBLE);
+    }
+
+    private void hideLoadingImages(){
+        images_pb.setVisibility(View.GONE);
+    }
+
 
 }

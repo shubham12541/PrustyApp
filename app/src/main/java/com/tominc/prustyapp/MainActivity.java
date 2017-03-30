@@ -1,6 +1,5 @@
 package com.tominc.prustyapp;
 
-import android.annotation.TargetApi;
 import android.app.ActivityManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -68,8 +67,7 @@ public class MainActivity extends AppCompatActivity
 //                        .setAction("Action", null).show();
 
                 Intent in = new Intent(MainActivity.this, AddProductActivity.class);
-//                startActivity(in);
-                startActivityForResult(in, REQUEST_ADD_PRODUCT);
+                startActivity(in);
             }
         });
 
@@ -95,7 +93,7 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 FirebaseUser mUser = firebaseAuth.getCurrentUser();
-                if(user==null){
+                if(mUser == null){
                     Intent in = new Intent(MainActivity.this, LoginActivity.class);
                     startActivity(in);
                     finish();
@@ -103,17 +101,7 @@ public class MainActivity extends AppCompatActivity
             }
         };
 
-        mAuth.addAuthStateListener(authStateListener);
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode==REQUEST_ADD_PRODUCT && resultCode==RESULT_OK){
-            Product prod = (Product) data.getSerializableExtra("prod");
-            fragment1.addProduct(prod);
-
-        }
+//        mAuth.addAuthStateListener(authStateListener);
     }
 
     @Override
@@ -138,9 +126,7 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        } else if(id == R.id.action_logout){
+        if(id == R.id.action_logout){
             SharedPreferences.Editor edit = mPrefs.edit();
             edit.clear();
             edit.apply();
@@ -149,7 +135,6 @@ public class MainActivity extends AppCompatActivity
                 ((ActivityManager)getApplicationContext().getSystemService(ACTIVITY_SERVICE)).clearApplicationUserData();
             }
 
-//            finish();
             mAuth.signOut();
             Intent in = new Intent(MainActivity.this, LoginActivity.class);
             startActivity(in);

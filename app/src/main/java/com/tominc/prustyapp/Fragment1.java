@@ -12,32 +12,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.GridView;
-import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
-import com.google.android.gms.common.data.DataBufferObserverSet;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
-
 import de.mateware.snacky.Snacky;
 
 /**
@@ -52,7 +37,6 @@ public class Fragment1 extends Fragment {
     SwipeRefreshLayout mSwipeRefreshLayout;
     ArrayList<Product> items;
     ProductRecyclerViewAdapter adapter;
-    RequestQueue rq;
     RelativeLayout allItems;
 
     View noDataFoundView;
@@ -110,17 +94,11 @@ public class Fragment1 extends Fragment {
         }
 
         items = new ArrayList<>();
-        rq = Volley.newRequestQueue(getActivity());
 
         pb =  root.findViewById(R.id.loading_data);
         allItems = (RelativeLayout) root.findViewById(R.id.fragment1_items);
 
         pb.setVisibility(View.VISIBLE);
-
-//        final GridView list;
-//        list = (GridView) root.findViewById(R.id.product_list);
-//        final ProductListAdapter adapter = new ProductListAdapter(getActivity(), items);
-//        list.setAdapter(adapter);
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) root.findViewById(R.id.refresh_products);
         mSwipeRefreshLayout.setColorSchemeResources(R.color.red,

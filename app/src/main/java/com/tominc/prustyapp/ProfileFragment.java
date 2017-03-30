@@ -15,6 +15,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.github.ybq.android.spinkit.SpinKitView;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -37,6 +38,9 @@ public class ProfileFragment extends Fragment {
     SharedPreferences mPrefs;
     StorageReference mStorage;
     final private String TAG = "ProfileFragment";
+
+    SpinKitView pb;
+    View pb_background;
 
 
     public ProfileFragment() {
@@ -69,6 +73,8 @@ public class ProfileFragment extends Fragment {
                 .getReference("profiles")
                 .child("images/" + mUser.getUid() + "/profile.jpg");
 
+        pb = (SpinKitView) root.findViewById(R.id.loading);
+        pb_background = root.findViewById(R.id.loading_background);
         name = (TextView) root.findViewById(R.id.show_profile_name);
         email = (TextView) root.findViewById(R.id.show_profile_email);
         phone = (TextView) root.findViewById(R.id.show_profile_phone);
@@ -76,6 +82,7 @@ public class ProfileFragment extends Fragment {
         college = (TextView) root.findViewById(R.id.show_profile_college);
         profile_image = (CircularImageView) root.findViewById(R.id.show_profile_image);
 
+        showLoading();
 
         name.setText(user.getName());
         email.setText(user.getEmail());
@@ -95,6 +102,7 @@ public class ProfileFragment extends Fragment {
                                 Glide.with(getActivity())
                                         .load(tempFile)
                                         .into(profile_image);
+                                hideLoading();
                             }
                         }
                     })
@@ -103,6 +111,7 @@ public class ProfileFragment extends Fragment {
                         public void onFailure(@NonNull Exception e) {
                             Log.d(TAG, "onFailure: Profile image could not be downloaded " + e.toString());
                             // make avatar is default
+                            hideLoading();
 //                            Glide.with(getActivity())
 //                                    .load(R.drawable.ic_male_avatar)
 //                                    .into(profile_image);
@@ -116,6 +125,16 @@ public class ProfileFragment extends Fragment {
 
         return root;
 
+    }
+
+    private void hideLoading(){
+        pb.setVisibility(View.GONE);
+        pb_background.setVisibility(View.GONE);
+    }
+
+    private void showLoading(){
+        pb.setVisibility(View.VISIBLE);
+        pb_background.setVisibility(View.VISIBLE);
     }
 
 }

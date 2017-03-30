@@ -440,9 +440,6 @@ public class AddProductActivity extends AppCompatActivity {
             });
         }
 
-//        Intent in = new Intent();
-//        in.putExtra("prod", prod);
-//        setResult(RESULT_OK, in);
         finish();
 
     }

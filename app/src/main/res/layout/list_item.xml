@@ -24,17 +24,14 @@
             android:layout_height="wrap_content"
             android:padding="8dp" >
 
-            <net.bohush.geometricprogressview.GeometricProgressView
+            <com.github.ybq.android.spinkit.SpinKitView
                 android:id="@+id/progress_bar"
+                android:layout_margin="44dp"
+                style="@style/SpinKitView.Wave"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:layout_margin="32dp"
-                app:gp_type="kite"
-                app:gp_number_of_angles="20"
-                app:gp_color="@color/colorAccent"
-                app:gp_duration="1000"
-                app:gp_figure_padding="3dp" />
+                app:SpinKit_Color="@color/colorAccent" />
 
 
             <ImageView

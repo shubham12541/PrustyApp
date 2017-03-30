@@ -30,13 +30,31 @@
                     android:src="@drawable/ic_male_avatar"
                     android:layout_width="150dp"
                     android:layout_height="150dp"
-                    app:civ_border_color="#EEEEEE"
+                    app:civ_border_color="#fafafa"
                     app:civ_border_width="4dp"
                     app:civ_shadow="true"
                     android:background="#fafafa"
                     android:layout_centerInParent="true"
                     app:civ_shadow_radius="10"
                     app:civ_shadow_color="#8BC34A" />
+
+
+                <View
+                    android:id="@+id/loading_background"
+                    android:layout_centerInParent="true"
+                    android:background="#eeeeee"
+                    android:layout_width="150dp"
+                    android:layout_height="150dp" />
+
+                <com.github.ybq.android.spinkit.SpinKitView
+                    android:id="@+id/loading"
+                    style="@style/SpinKitView.Wave"
+                    android:layout_centerInParent="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:SpinKit_Color="@color/colorAccent" />
+
+
 
             </RelativeLayout>
 

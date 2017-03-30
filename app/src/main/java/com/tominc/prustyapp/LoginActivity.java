@@ -3,8 +3,9 @@ package com.tominc.prustyapp;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.support.annotation.MainThread;
 import android.support.annotation.NonNull;
+import android.support.design.widget.TextInputEditText;
+import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -18,14 +19,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.AuthFailureError;
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 import com.basgeekball.awesomevalidation.AwesomeValidation;
 import com.basgeekball.awesomevalidation.ValidationStyle;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -41,27 +34,17 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
-
-import net.bohush.geometricprogressview.GeometricProgressView;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Map;
-
 import de.mateware.snacky.Snacky;
 
 public class LoginActivity extends AppCompatActivity {
-    EditText email, pass;
     TextView skip, register;
     Button submit;
-    Toolbar toolbar;
 
-//    GeometricProgressView pb;
     View pb;
     RelativeLayout allLoginItems;
+
+    TextInputLayout input_layout_email, input_layout_password;
+    TextInputEditText input_email, input_password;
 
     private final String LOGIN_URL = Config.BASE_URL + "login.php";
     SharedPreferences mPrefs;
@@ -72,17 +55,15 @@ public class LoginActivity extends AppCompatActivity {
     FirebaseAuth.AuthStateListener mAuthListener;
     DatabaseReference mRefs;
 
-    private AwesomeValidation validator = new AwesomeValidation(ValidationStyle.UNDERLABEL);
+    private AwesomeValidation validator = new AwesomeValidation(ValidationStyle.TEXT_INPUT_LAYOUT);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
+        setContentView(R.layout.activity_login2);
 
         pb =  findViewById(R.id.logging_in);
         allLoginItems = (RelativeLayout) findViewById(R.id.login_items);
-
-        validator.setContext(this);
 
         mAuth = FirebaseAuth.getInstance();
 
@@ -110,16 +91,13 @@ public class LoginActivity extends AppCompatActivity {
 //            finish();
         }
 
-        toolbar = (Toolbar) findViewById(R.id.login_toolbar);
-        toolbar.setTitle("PrustyApp");
-        toolbar.setTitleTextColor(Color.WHITE);
-        setSupportActionBar(toolbar);
-
-        email = (EditText) findViewById(R.id.login_email);
-        pass = (EditText) findViewById(R.id.login_pass);
+        input_layout_email = (TextInputLayout) findViewById(R.id.input_email_layout);
+        input_layout_password = (TextInputLayout) findViewById(R.id.input_password_layout);
+        input_email = (TextInputEditText) findViewById(R.id.input_email);
+        input_password = (TextInputEditText) findViewById(R.id.input_password);
         submit = (Button) findViewById(R.id.login_submit);
 
-        validator.addValidation(LoginActivity.this, R.id.login_email, Patterns.EMAIL_ADDRESS, R.string.email_validation);
+        validator.addValidation(LoginActivity.this, R.id.input_email_layout, Patterns.EMAIL_ADDRESS, R.string.email_validation);
 
         findViewById(R.id.login_skip).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -161,8 +139,8 @@ public class LoginActivity extends AppCompatActivity {
             public void onClick(View view) {
                 validator.clear();
                 if(validator.validate()){
-                    String s_email = email.getText().toString();
-                    String s_pass = pass.getText().toString();
+                    String s_email = input_email.getText().toString();
+                    String s_pass = input_password.getText().toString();
 
                     if (s_email.length() == 0 || s_pass.length() == 0) {
 //                        Toast.makeText(getApplicationContext(), "Incomplete Information", Toast.LENGTH_SHORT).show();
@@ -211,7 +189,7 @@ public class LoginActivity extends AppCompatActivity {
                                         .setDuration(Snacky.LENGTH_SHORT)
                                         .error()
                                         .show();
-                                LoginActivity.this.email.requestFocus();
+                                LoginActivity.this.input_email.requestFocus();
                             } catch (FirebaseAuthInvalidUserException e){
 //                                Toast.makeText(LoginActivity.this, "Invalid Username", Toast.LENGTH_SHORT).show();
                                 Snacky.builder()

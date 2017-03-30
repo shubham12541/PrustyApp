@@ -10,8 +10,11 @@ import android.hardware.usb.UsbRequest;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.design.widget.TextInputEditText;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.widget.TextViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -22,6 +25,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
@@ -74,10 +78,17 @@ import de.mateware.snacky.Snacky;
 
 public class RegisterActivity extends AppCompatActivity {
     //TODO: Register should be divided into multiple pages
-    EditText f_name, l_name, email, pass, c_pass, phone, college, year;
-    Button submit, clear;
+    Button submit;
+    TextView clear;
     CircularImageView profile_image;
     Toolbar toolbar;
+
+    TextInputLayout input_layout_f_name, input_layout_l_name, input_layout_email, input_layout_password, input_layout_confirm_password,
+                input_layout_phone, input_layout_college, input_layout_year;
+
+    TextInputEditText input_f_name, input_l_name, input_email, input_password, input_confirm_password, input_phone, input_college,
+                input_year;
+
     LinearLayout allRegisterItems;
 
 //    GeometricProgressView pb;
@@ -96,15 +107,14 @@ public class RegisterActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
 
-    private AwesomeValidation validator = new AwesomeValidation(ValidationStyle.UNDERLABEL);
+    private AwesomeValidation validator = new AwesomeValidation(ValidationStyle.TEXT_INPUT_LAYOUT);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_register);
+        setContentView(R.layout.activity_register2);
 
         mAuth = FirebaseAuth.getInstance();
-        validator.setContext(this);
 
     }
 
@@ -123,31 +133,43 @@ public class RegisterActivity extends AppCompatActivity {
 
         mPref = getSharedPreferences("app", MODE_PRIVATE);
 
-        f_name = (EditText) findViewById(R.id.register_f_name);
-        l_name = (EditText) findViewById(R.id.register_l_name);
-        email = (EditText) findViewById(R.id.register_email);
-        pass = (EditText) findViewById(R.id.register_pass);
-        college = (EditText) findViewById(R.id.register_college);
-        c_pass = (EditText) findViewById(R.id.register_con_pass);
-        phone = (EditText) findViewById(R.id.register_phone);
-        year = (EditText) findViewById(R.id.register_year);
+        input_layout_f_name = (TextInputLayout) findViewById(R.id.input_layout_f_name);
+        input_layout_l_name = (TextInputLayout) findViewById(R.id.input_layout_l_name);
+        input_layout_email = (TextInputLayout) findViewById(R.id.input_layout_email);
+        input_layout_password = (TextInputLayout) findViewById(R.id.input_layout_password);
+        input_layout_confirm_password = (TextInputLayout) findViewById(R.id.input_layout_confirm_password);
+        input_layout_college = (TextInputLayout) findViewById(R.id.input_layout_college);
+        input_layout_phone = (TextInputLayout) findViewById(R.id.input_layout_phone);
+        input_layout_year = (TextInputLayout) findViewById(R.id.input_layout_year);
+
+        input_f_name = (TextInputEditText) findViewById(R.id.input_f_name);
+        input_l_name = (TextInputEditText) findViewById(R.id.input_l_name);
+        input_email = (TextInputEditText) findViewById(R.id.input_email);
+        input_password = (TextInputEditText) findViewById(R.id.input_password);
+        input_confirm_password = (TextInputEditText) findViewById(R.id.input_confirm_password);
+        input_college = (TextInputEditText) findViewById(R.id.input_college);
+        input_phone = (TextInputEditText) findViewById(R.id.input_phone);
+        input_year = (TextInputEditText) findViewById(R.id.input_year);
+
         profile_image = (CircularImageView) findViewById(R.id.register_image);
         submit = (Button) findViewById(R.id.register_submit);
-        clear = (Button) findViewById(R.id.register_clear);
+        clear = (TextView) findViewById(R.id.register_clear);
         pb =  findViewById(R.id.logging_in);
         allRegisterItems = (LinearLayout) findViewById(R.id.register_items);
 
-        validator.addValidation(RegisterActivity.this, R.id.register_f_name, "[a-zA-Z\\s]+", R.string.first_name_validation);
-        validator.addValidation(RegisterActivity.this, R.id.register_l_name, "[a-zA-Z\\s]+", R.string.last_name_validation);
-        validator.addValidation(RegisterActivity.this, R.id.register_email, Patterns.EMAIL_ADDRESS, R.string.email_validation);
-        validator.addValidation(RegisterActivity.this, R.id.register_phone, RegexTemplate.TELEPHONE, R.string.phone_validation);
-        validator.addValidation(RegisterActivity.this, R.id.register_college, "[a-zA-Z\\s]+", R.string.college_validation);
+
+        validator.addValidation(RegisterActivity.this, R.id.input_layout_f_name, "^(?!\\s*$).+", R.string.first_name_validation);
+//        validator.addValidation(RegisterActivity.this, R.id.input_layout_l_name, "^(?!\\s*$).+", R.string.last_name_validation);
+        validator.addValidation(RegisterActivity.this, R.id.input_layout_email, Patterns.EMAIL_ADDRESS, R.string.email_validation);
+        validator.addValidation(RegisterActivity.this, R.id.input_layout_password, "^(?!\\s*$).+", R.string.register_password_validation);
+        validator.addValidation(RegisterActivity.this, R.id.input_layout_confirm_password, "^(?!\\s*$).+", R.string.register_password_validation);
+        validator.addValidation(RegisterActivity.this, R.id.input_layout_phone, RegexTemplate.TELEPHONE, R.string.phone_validation);
+        validator.addValidation(RegisterActivity.this, R.id.input_layout_college, "[a-zA-Z\\s]+", R.string.college_validation);
+        validator.addValidation(RegisterActivity.this, R.id.input_layout_year, "^(?!\\s*$).+", R.string.year_validation);
 
 //        String regexPassword = "(?=.*[a-z])(?=.*[A-Z])(?=.*[\\d])(?=.*[~`!@#\\$%\\^&\\*\\(\\)\\-_\\+=\\{\\}\\[\\]\\|\\;:\"<>,./\\?]).{8,}";
 
-//        validator.addValidation(RegisterActivity.this, R.id.register_pass, regexPassword, R.string.password_validation);
-// to validate a confirmation field (don't validate any rule other than confirmation on confirmation field)
-        validator.addValidation(RegisterActivity.this, R.id.register_con_pass, R.id.register_pass, R.string.password_duplication_validation);
+//        validator.addValidation(RegisterActivity.this, R.id.register_con_pass, R.id.register_pass, R.string.password_duplication_validation);
 
 
         profile_image.setOnClickListener(new View.OnClickListener() {
@@ -173,13 +195,13 @@ public class RegisterActivity extends AppCompatActivity {
             public void onClick(View view) {
                 validator.clear();
                 if(validator.validate()){
-                    String s_name = f_name.getText().toString() + " " + l_name.getText().toString();
-                    String s_email = email.getText().toString();
-                    String s_pass = pass.getText().toString();
-                    String s_c_pass = c_pass.getText().toString();
-                    String s_phone = phone.getText().toString();
-                    String s_college = college.getText().toString();
-                    String s_year = year.getText().toString();
+                    String s_name = input_f_name.getText().toString() + " " + input_l_name.getText().toString();
+                    String s_email = input_email.getText().toString();
+                    String s_pass = input_password.getText().toString();
+                    String s_c_pass = input_confirm_password.getText().toString();
+                    String s_phone = input_phone.getText().toString();
+                    String s_college = input_college.getText().toString();
+                    String s_year = input_year.getText().toString();
 
                     if (s_name.length() == 0 || s_email.length() == 0 || s_pass.length() == 0 || s_c_pass.length() == 0
                             || s_phone.length() == 0 || s_c_pass.length() == 0 || s_college.length() == 0
@@ -288,7 +310,7 @@ public class RegisterActivity extends AppCompatActivity {
                                         .setDuration(Snacky.LENGTH_SHORT)
                                         .error()
                                         .show();
-                                RegisterActivity.this.pass.requestFocus();
+                                RegisterActivity.this.input_layout_password.requestFocus();
                             } catch(FirebaseAuthInvalidCredentialsException e) {
 //                                RegisterActivity.this.email.setError(getString(R.string.error_invalid_email));
                                 Snacky.builder()
@@ -297,7 +319,7 @@ public class RegisterActivity extends AppCompatActivity {
                                         .setDuration(Snacky.LENGTH_SHORT)
                                         .error()
                                         .show();
-                                RegisterActivity.this.email.requestFocus();
+                                RegisterActivity.this.input_layout_email.requestFocus();
                             } catch(FirebaseAuthUserCollisionException e) {
 //                                RegisterActivity.this.email.setError(getString(R.string.error_user_exists));
                                 Snacky.builder()
@@ -306,7 +328,7 @@ public class RegisterActivity extends AppCompatActivity {
                                         .setDuration(Snacky.LENGTH_SHORT)
                                         .error()
                                         .show();
-                                RegisterActivity.this.email.requestFocus();
+                                RegisterActivity.this.input_layout_email.requestFocus();
                             } catch(Exception e) {
                                 Log.e(TAG, e.getMessage());
                             }
@@ -372,7 +394,7 @@ public class RegisterActivity extends AppCompatActivity {
                         user.setCollege(college);
                         user.setPhone(phone);
                         user.setYear(year);
-                        user.setEmail(RegisterActivity.this.email.getText().toString());
+                        user.setEmail(RegisterActivity.this.input_email.getText().toString());
                         user.setUserId(userId);
 
                         mRefs.child(userId).setValue(user);
@@ -421,4 +443,11 @@ public class RegisterActivity extends AppCompatActivity {
         pb.setVisibility(View.INVISIBLE);
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        Intent in = new Intent(RegisterActivity.this, LoginActivity.class);
+        startActivity(in);
+        finish();
+    }
 }
