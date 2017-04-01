@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="@dimen/nav_header_height"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@drawable/material"
     android:gravity="center"
     android:orientation="vertical"
@@ -11,12 +12,40 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     android:theme="@style/ThemeOverlay.AppCompat.Dark">
 
-    <com.mikhaellopez.circularimageview.CircularImageView
-        android:id="@+id/imageView"
+
+
+    <RelativeLayout
         android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:paddingTop="@dimen/nav_header_vertical_spacing"
-        android:src="@drawable/ic_male_avatar" />
+        android:layout_height="80dp">
+
+        <com.mikhaellopez.circularimageview.CircularImageView
+            android:id="@+id/nav_header_profile_pic"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:paddingTop="@dimen/nav_header_vertical_spacing"
+            android:src="@drawable/ic_male_avatar" />
+
+        <RelativeLayout
+            android:id="@+id/loading"
+            android:visibility="visible"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <View
+                android:background="#eeeeee"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <com.github.ybq.android.spinkit.SpinKitView
+                style="@style/SpinKitView.Small.Wave"
+                android:layout_centerInParent="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:SpinKit_Color="@color/colorAccent" />
+
+        </RelativeLayout>
+
+    </RelativeLayout>
 
     <TextView
         android:id="@+id/nav_header_name"

@@ -22,13 +22,26 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.storage.FileDownloadTask;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.google.gson.Gson;
+import com.tominc.prustyapp.utilities.DownloadFirebaseImage;
+import com.tominc.prustyapp.utilities.DownloadMethods;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
+
+import de.mateware.snacky.Snacky;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -38,6 +51,13 @@ public class MainActivity extends AppCompatActivity
     User user;
     Fragment1 fragment1;
     private final int REQUEST_ADD_PRODUCT = 122;
+    private final String TAG = "MainActivity";
+
+    TextView nav_header_name, nav_header_email;
+    ImageView nav_header_image;
+    RelativeLayout nav_header_loading_image;
+
+    StorageReference mStorage;
 
     private FirebaseAuth mAuth;
 
@@ -49,6 +69,12 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
 
         mAuth = FirebaseAuth.getInstance();
+        FirebaseUser mUser = mAuth.getCurrentUser();
+
+        mStorage = FirebaseStorage
+                .getInstance()
+                .getReference("profiles")
+                .child("images/" + mUser.getUid() + "/profile.jpg");
 
 
         mPrefs = getSharedPreferences("app", MODE_PRIVATE);
@@ -82,13 +108,20 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         View view = navigationView.getHeaderView(0);
-        TextView nName= (TextView) view.findViewById(R.id.nav_header_name);
-        TextView nEmail = (TextView) view.findViewById(R.id.nav_header_email);
-        ImageView nPic = (ImageView) view.findViewById(R.id.imageView);
+
+        nav_header_name= (TextView) view.findViewById(R.id.nav_header_name);
+        nav_header_email = (TextView) view.findViewById(R.id.nav_header_email);
+        nav_header_image = (ImageView) view.findViewById(R.id.nav_header_profile_pic);
+        nav_header_loading_image = (RelativeLayout) view.findViewById(R.id.loading);
+
+        showNavLoadingImage();
+
+//        downloadProfilePic();
+        downloadProfilePicViaURL();
 
         if(user != null){
-            nName.setText(user.getName());
-            nEmail.setText(user.getEmail());
+            nav_header_name.setText(user.getName());
+            nav_header_email.setText(user.getEmail());
         }
 
         FirebaseAuth.AuthStateListener authStateListener = new FirebaseAuth.AuthStateListener() {
@@ -195,5 +228,27 @@ public class MainActivity extends AppCompatActivity
         startActivity(Intent.createChooser(in, "Choose Mail Client"));
     }
 
+    private void downloadProfilePicViaURL(){
+        DownloadFirebaseImage downloadImage = new DownloadFirebaseImage(MainActivity.this);
+        downloadImage.download(mStorage, nav_header_image, "Profile Pic could not be downloaded", new DownloadMethods() {
+            @Override
+            public void successMethod() {
+                hideNavLoadingImage();
+            }
+
+            @Override
+            public void failMethod() {
+                hideNavLoadingImage();
+            }
+        });
+    }
+
+    private void showNavLoadingImage(){
+        nav_header_loading_image.setVisibility(View.VISIBLE);
+    }
+
+    private void hideNavLoadingImage(){
+        nav_header_loading_image.setVisibility(View.GONE);
+    }
 
 }

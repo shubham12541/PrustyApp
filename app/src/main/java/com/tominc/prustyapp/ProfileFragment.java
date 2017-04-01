@@ -225,7 +225,6 @@ public class ProfileFragment extends Fragment {
                             .warning()
                             .show();
                 }
-                return;
         }
     }
 

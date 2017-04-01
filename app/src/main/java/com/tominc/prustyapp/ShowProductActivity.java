@@ -38,6 +38,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.daimajia.slider.library.Animations.DescriptionAnimation;
 import com.daimajia.slider.library.Indicators.PagerIndicator;
 import com.daimajia.slider.library.SliderLayout;
@@ -57,6 +60,8 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.gson.Gson;
 import com.mikhaellopez.circularimageview.CircularImageView;
+import com.tominc.prustyapp.utilities.DownloadFirebaseImage;
+import com.tominc.prustyapp.utilities.DownloadMethods;
 
 import java.io.File;
 import java.io.IOException;
@@ -181,7 +186,8 @@ public class ShowProductActivity extends AppCompatActivity {
         String json = mPrefs_user.getString("user", "");
         user = gson.fromJson(json, User.class);
 
-        loadProfilePic();
+//        loadProfilePic();
+        downloadProfilePicViaURL();
 
         String liked = mPrefs.getString(prod.getName(), null);
         if(liked!=null){
@@ -262,7 +268,8 @@ public class ShowProductActivity extends AppCompatActivity {
         share_message.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                smsMessage();
+//                smsMessage();
+                sendMessage();
             }
         });
 
@@ -527,45 +534,24 @@ public class ShowProductActivity extends AppCompatActivity {
         dialog.dismiss();
     }
 
-    private void loadProfilePic(){
+    private void downloadProfilePicViaURL(){
         StorageReference mProfileRef = FirebaseStorage
                 .getInstance()
                 .getReference("profiles")
                 .child("images/" + prod.getUserId() + "/profile.jpg");
 
+        DownloadFirebaseImage downloadImage = new DownloadFirebaseImage(ShowProductActivity.this);
+        downloadImage.download(mProfileRef, profile_pic, "Profile Pic could not be downloaded", new DownloadMethods() {
+            @Override
+            public void successMethod() {
+                hideProfileLoading();
+            }
 
-        final File tempFile;
-        try {
-            tempFile = File.createTempFile("images", "jpg");
-
-            mProfileRef.getFile(tempFile)
-                    .addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
-                        @Override
-                        public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                            if(!ShowProductActivity.this.isDestroyed()){
-                                hideProfileLoading();
-                                Glide.with(ShowProductActivity.this)
-                                        .load(tempFile)
-                                        .into(profile_pic);
-                            }
-                        }
-                    })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Log.d(TAG, "onFailure: Profile image could not be downloaded " + e.toString());
-                            hideProfileLoading();
-                            // Male Avatar is already in the view
-//                            Glide.with(ShowProductActivity.this)
-//                                 s   .load(R.drawable.ic_male_avatar)
-//                                    .into(profile_pic);
-                        }
-                    });
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            Log.d(TAG, "onCreateView: Temp file could not be created");
-        }
+            @Override
+            public void failMethod() {
+                hideProfileLoading();
+            }
+        });
     }
 
 
@@ -580,6 +566,20 @@ public class ShowProductActivity extends AppCompatActivity {
                 + " and I want to buy it.\nKindly reply if you are still intrested to sell the product." );
 
         startActivity(Intent.createChooser(in, "Choose Mail Client"));
+    }
+
+    // if whatsapp is installed then whatsapp else normal message
+    private void sendMessage(){
+        PackageManager pm = getPackageManager();
+        try{
+            pm.getPackageInfo("com.whatsapp", PackageManager.GET_ACTIVITIES);
+            whatsappMessage();
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.d(TAG, "sendMessage: Whatsapp not installed");
+            e.printStackTrace();
+            smsMessage();
+        }
+
     }
 
     private void whatsappMessage(){
