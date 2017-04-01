@@ -28,6 +28,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.gson.Gson;
 
+import java.util.List;
+
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -146,6 +148,7 @@ public class MainActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
+
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
@@ -173,14 +176,7 @@ public class MainActivity extends AppCompatActivity
                 startActivity(sendIntent);
             }
         } else if (id == R.id.nav_send){
-            Intent sendIntent = new Intent(Intent.ACTION_VIEW);
-            sendIntent.setType("plain/text");
-            sendIntent.setData(Uri.parse("shubhamchaudhary376@gmail.com"));
-            sendIntent.setClassName("com.google.android.gm", "com.google.android.gm.ComposeActivityGmail");
-            sendIntent.putExtra(Intent.EXTRA_EMAIL, new String[] { "shubhamchaudhary376@gmail.com" });
-            sendIntent.putExtra(Intent.EXTRA_SUBJECT, "Feedback for app");
-            sendIntent.putExtra(Intent.EXTRA_TEXT, "I have downloaded the app and I would like to suggest some changes.\n\n");
-            startActivity(sendIntent);
+            sendFeedback();
         }
 
 //        setTitle(item.getTitle());
@@ -188,6 +184,15 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private void sendFeedback(){
+        Intent in = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:" + "shubhamchaudhary376@gmail.com"));
+        in.setType("message/rfc822");
+        in.putExtra(Intent.EXTRA_SUBJECT, getResources().getString(R.string.app_name) + " app feedback");
+        in.putExtra(Intent.EXTRA_TEXT, getResources().getString(R.string.feedback_text));
+
+        startActivity(Intent.createChooser(in, "Choose Mail Client"));
     }
 
 

@@ -16,7 +16,6 @@
         android:layout_height="match_parent">
 
         <ScrollView
-            android:layout_marginTop="16dp"
             android:padding="16dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
@@ -33,17 +32,37 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
 
-                    <com.mikhaellopez.circularimageview.CircularImageView
-                        android:id="@+id/register_image"
-                        android:src="@drawable/ic_male_avatar"
+                    <RelativeLayout
+                        android:id="@+id/profile_change_pic"
+                        android:visibility="visible"
+                        android:layout_centerInParent="true"
                         android:layout_width="100dp"
-                        android:layout_height="120dp"
-                        app:civ_border_color="#EEEEEE"
-                        android:background="#fafafa"
-                        app:civ_border_width="4dp"
-                        app:civ_shadow="true"
-                        app:civ_shadow_radius="10"
-                        app:civ_shadow_color="#8BC34A" />
+                        android:layout_height="120dp">
+
+                        <com.mikhaellopez.circularimageview.CircularImageView
+                            android:id="@+id/register_image"
+                            android:src="@drawable/ic_male_avatar"
+                            android:layout_width="100dp"
+                            android:layout_height="120dp"
+                            app:civ_border_color="#EEEEEE"
+                            android:layout_centerInParent="true"
+                            android:background="#fafafa"
+                            app:civ_border_width="4dp"
+                            app:civ_shadow="true"
+                            app:civ_shadow_radius="10"
+                            app:civ_shadow_color="#8BC34A" />
+
+                        <TextView
+                            android:text="Change"
+                            android:gravity="center"
+                            android:textSize="18sp"
+                            android:textStyle="bold"
+                            android:background="@color/white"
+                            android:layout_alignParentBottom="true"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content" />
+
+                    </RelativeLayout>
 
                     <LinearLayout
                         android:orientation="vertical"

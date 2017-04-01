@@ -18,6 +18,8 @@
     <string name="error_invalid_email">Invalid email ID</string>
     <string name="error_user_exists">Email already registed</string>
 
+    <string name="error_phone_length">Phone No. should be of length 10</string>
+
     <string name="user_creation_error">Unable to create user</string>
     <string name="authentication_error">Authentication Failed</string>
     <string name="fill_details_warning">Fill all details</string>
@@ -31,6 +33,9 @@
     
     <string name="register_password_validation">Password must contain atleast 6 characters</string>
     <string name="year_validation">Year should not be empty</string>
+    <string name="error_empty_college">College name can not be empty</string>
+
+    <string name="feedback_text">Hi\nI have downloaded Quad app and I would like to share my feedback for the app: /n1. </string>
 
     <string name="temp">This is a real story of a young college girl who passed away last month in Coimbatore
 

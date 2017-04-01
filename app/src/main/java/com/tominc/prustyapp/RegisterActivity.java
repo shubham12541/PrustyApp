@@ -25,6 +25,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -90,6 +91,7 @@ public class RegisterActivity extends AppCompatActivity {
                 input_year;
 
     LinearLayout allRegisterItems;
+    RelativeLayout change_profile_pic;
 
 //    GeometricProgressView pb;
     View pb;
@@ -151,6 +153,8 @@ public class RegisterActivity extends AppCompatActivity {
         input_phone = (TextInputEditText) findViewById(R.id.input_phone);
         input_year = (TextInputEditText) findViewById(R.id.input_year);
 
+        change_profile_pic = (RelativeLayout) findViewById(R.id.profile_change_pic);
+
         profile_image = (CircularImageView) findViewById(R.id.register_image);
         submit = (Button) findViewById(R.id.register_submit);
         clear = (TextView) findViewById(R.id.register_clear);
@@ -172,7 +176,7 @@ public class RegisterActivity extends AppCompatActivity {
 //        validator.addValidation(RegisterActivity.this, R.id.register_con_pass, R.id.register_pass, R.string.password_duplication_validation);
 
 
-        profile_image.setOnClickListener(new View.OnClickListener() {
+        change_profile_pic.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 

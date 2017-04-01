@@ -269,15 +269,8 @@ public class ShowProductActivity extends AppCompatActivity {
         share_email.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent sendIntent = new Intent(Intent.ACTION_VIEW);
-                sendIntent.setType("plain/text");
-                FirebaseUser mUser = FirebaseAuth.getInstance().getCurrentUser();
-                sendIntent.setData(Uri.parse(mUser.getEmail()));
-                sendIntent.setClassName("com.google.android.gm", "com.google.android.gm.ComposeActivityGmail");
-                sendIntent.putExtra(Intent.EXTRA_EMAIL, new String[] { mUser.getEmail() });
-                sendIntent.putExtra(Intent.EXTRA_SUBJECT, prod.getName() + ": on app");
-                sendIntent.putExtra(Intent.EXTRA_TEXT, "I want to buy the product reply to negotiate.");
-                startActivity(sendIntent);
+                mailMessage();
+
             }
         });
     }
@@ -576,6 +569,19 @@ public class ShowProductActivity extends AppCompatActivity {
     }
 
 
+    private void mailMessage(){
+        Intent in = new Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:" + "shubhamchaudhary376@gmail.com"));
+        in.setType("message/rfc822");
+        in.putExtra(Intent.EXTRA_SUBJECT, "Product " + prod.getName() + ": on app" + getResources().getString(R.string.app_name));
+        in.putExtra(Intent.EXTRA_TEXT, "Hi\nI saw you product "
+                + prod.getName()
+                + " on app "
+                + getResources().getString(R.string.app_name)
+                + " and I want to buy it.\nKindly reply if you are still intrested to sell the product." );
+
+        startActivity(Intent.createChooser(in, "Choose Mail Client"));
+    }
+
     private void whatsappMessage(){
         try {
             Intent in = new Intent(Intent.ACTION_SEND, Uri.parse("smsto:"+prod.getPhone()));
@@ -617,6 +623,5 @@ public class ShowProductActivity extends AppCompatActivity {
     private void hideLoadingImages(){
         images_pb.setVisibility(View.GONE);
     }
-
 
 }
