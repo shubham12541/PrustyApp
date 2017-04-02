@@ -435,6 +435,35 @@ public class ShowProductActivity extends AppCompatActivity {
             final File tempFile2 = tempFile;
             final int finalI = i;
 
+//            DownloadFirebaseImage imageDownloader = new DownloadFirebaseImage(ShowProductActivity.this, "ShowProductActivity_Donwload Slider Images");
+//            final ImageView imageView = new ImageView(ShowProductActivity.this);
+//            imageDownloader.download(mStorage, imageView, "Failed to download image", new DownloadMethods() {
+//                @Override
+//                public void successMethod() {
+//                    Log.d(TAG, "successMethod: Image downloaded, now adding to sliderView");
+//                    SliderView sliderView = new SliderView(ShowProductActivity.this, finalI, prod.getProductId());
+//                    sliderView.setScaleType(BaseSliderView.ScaleType.CenterCrop);
+//                    imageView.buildDrawingCache();
+//                    sliderView.setImage(imageView.getDrawingCache());
+////                    sliderView.setImage(BitmapFactory.decodeFile(tempFile2.toString()));
+//
+//                    mSlider.addSlider(sliderView);
+//                    Log.d(TAG, "onSuccess: got image ");
+//
+//                    imagePaths.add(tempFile2.getAbsolutePath());
+//                    SharedPreferences.Editor edit = mPrefs.edit();
+//                    edit.putString("image"+finalI, tempFile2.toString());
+//                    edit.apply();
+//
+//                    hideLoadingImages();
+//                }
+//
+//                @Override
+//                public void failMethod() {
+//                    hideLoadingImages();
+//                }
+//            });
+
             mStorage.getFile(tempFile2)
                     .addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
                         @Override
@@ -563,7 +592,7 @@ public class ShowProductActivity extends AppCompatActivity {
                 + prod.getName()
                 + " on app "
                 + getResources().getString(R.string.app_name)
-                + " and I want to buy it.\nKindly reply if you are still intrested to sell the product." );
+                + " and I want to buy it.\nKindly reply if you are still interested to sell the product." );
 
         startActivity(Intent.createChooser(in, "Choose Mail Client"));
     }

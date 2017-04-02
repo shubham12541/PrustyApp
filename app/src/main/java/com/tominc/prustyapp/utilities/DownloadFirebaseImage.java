@@ -23,8 +23,13 @@ import de.mateware.snacky.Snacky;
  */
 
 public class DownloadFirebaseImage{
-    Context c;
-    private final String TAG = "DownloadFirebaseImage";
+    private Context c;
+    private String TAG = "DownloadFirebaseImage";
+
+    public DownloadFirebaseImage(Context c, final String TAG){
+        this.c = c;
+        this.TAG = TAG;
+    }
 
     public DownloadFirebaseImage(Context c){
         this.c = c;
@@ -36,35 +41,42 @@ public class DownloadFirebaseImage{
                     @Override
                     public void onSuccess(Uri uri) {
                         Log.d(TAG, "onSuccess: Image download link generated");
-                        Glide.with(c)
-                                .load(uri)
-                                .listener(new RequestListener<Uri, GlideDrawable>() {
-                                    @Override
-                                    public boolean onException(Exception e, Uri model, Target<GlideDrawable> target, boolean isFirstResource) {
-                                        Log.d(TAG, "onException: Image downloaded");
-                                        Snacky.builder()
-                                                .setActivty((Activity) c)
-                                                .setDuration(Snacky.LENGTH_SHORT)
-                                                .setText(failMessage)
-                                                .warning().show();
-                                        downloadMethods.successMethod();
-                                        return false;
-                                    }
+                        if(!((Activity) c).isDestroyed()){
+                            Glide.with(c)
+                                    .load(uri)
+                                    .listener(new RequestListener<Uri, GlideDrawable>() {
+                                        @Override
+                                        public boolean onException(Exception e, Uri model, Target<GlideDrawable> target, boolean isFirstResource) {
+                                            Log.d(TAG, "onException: Image could not be downloaded");
+                                            if(failMessage.length()!=0){
+                                                Snacky.builder()
+                                                        .setActivty((Activity) c)
+                                                        .setDuration(Snacky.LENGTH_SHORT)
+                                                        .setText(failMessage)
+                                                        .warning().show();
+                                                downloadMethods.failMethod();
+                                            }
+                                            return false;
+                                        }
 
-                                    @Override
-                                    public boolean onResourceReady(GlideDrawable resource, Uri model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
-                                        Log.d(TAG, "onResourceReady: Image could not downloaded");
-                                        downloadMethods.failMethod();
-                                        return false;
-                                    }
-                                })
-                                .into(imageView);
+                                        @Override
+                                        public boolean onResourceReady(GlideDrawable resource, Uri model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+                                            Log.d(TAG, "onResourceReady: Image downloaded");
+                                            downloadMethods.successMethod();
+                                            return false;
+                                        }
+                                    })
+                                    .crossFade()
+                                    .into(imageView);
+                        } else{
+                            Log.d(TAG, "onSuccess: Activity destroyed");
+                        }
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Log.d(TAG, "onFailure: Image could be downloaded");
+                        Log.d(TAG, "onFailure: Image could be downloaded " + e.toString());
                         downloadMethods.failMethod();
                     }
                 });

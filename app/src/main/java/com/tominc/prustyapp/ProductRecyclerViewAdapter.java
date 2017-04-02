@@ -17,6 +17,8 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.tominc.prustyapp.utilities.DownloadFirebaseImage;
+import com.tominc.prustyapp.utilities.DownloadMethods;
 
 import java.io.File;
 import java.io.IOException;
@@ -64,34 +66,48 @@ public class ProductRecyclerViewAdapter extends RecyclerView.Adapter<ProductView
             return;
         }
 
+        holder.pb.setVisibility(View.VISIBLE);
+
         FirebaseUser mUser = FirebaseAuth.getInstance().getCurrentUser();
         mStorage = FirebaseStorage.getInstance().getReference("ProductImages")
                 .child(items.get(position).getProductId())
                 .child("images/0.jpg");
 
-        holder.pb.setVisibility(View.VISIBLE);
+        DownloadFirebaseImage imageDownloader = new DownloadFirebaseImage(c);
+        imageDownloader.download(mStorage, holder.image, "", new DownloadMethods() {
+            @Override
+            public void successMethod() {
+                holder.pb.setVisibility(View.GONE);
+            }
 
-        mStorage.getFile(localFile)
-                .addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
-                    @Override
-                    public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                        holder.pb.setVisibility(View.GONE);
-                        Glide.with(c)
-                                .load(localFile)
-                                .into(holder.image);
+            @Override
+            public void failMethod() {
+                holder.pb.setVisibility(View.GONE);
+            }
+        });
 
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.e(TAG, "onFailure: File could not be downloaded or available " + e.toString());
-                        holder.pb.setVisibility(View.GONE);
-                        Glide.with(c)
-                                .load(R.drawable.ic_not_available)
-                                .into(holder.image);
-                    }
-                });
+
+//        mStorage.getFile(localFile)
+//                .addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+//                    @Override
+//                    public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+//                        holder.pb.setVisibility(View.GONE);
+//                        Glide.with(c)
+//                                .load(localFile)
+//                                .into(holder.image);
+//
+//                    }
+//                })
+//                .addOnFailureListener(new OnFailureListener() {
+//                    @Override
+//                    public void onFailure(@NonNull Exception e) {
+//                        Log.e(TAG, "onFailure: File could not be downloaded or available " + e.toString());
+//                        holder.pb.setVisibility(View.GONE);
+//                        Glide.with(c)
+//                                .load(R.drawable.ic_not_available)
+//                                .into(holder.image);
+//                    }
+//                });
 
     }
 
