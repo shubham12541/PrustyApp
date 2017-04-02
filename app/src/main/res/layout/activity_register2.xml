@@ -165,34 +165,38 @@
 
                 </android.support.design.widget.TextInputLayout>
 
-
                 <android.support.design.widget.TextInputLayout
                     android:id="@+id/input_layout_college"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
 
-                    <android.support.design.widget.TextInputEditText
+                    <com.tominc.prustyapp.views.DelayAutoCompleteTextView
                         android:id="@+id/input_college"
+                        android:inputType="textCapSentences"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
                         android:hint="College"
-                        android:maxLines="1"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
+                        android:paddingEnd="8dp"
+                        android:imeOptions="flagNoExtractUi|actionSearch"/>
+
+                    <ProgressBar
+                        android:id="@+id/pb_loading_indicator"
+                        style="?android:attr/progressBarStyleSmall"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical|end"
+                        android:layout_marginRight="16dp"
+                        android:visibility="gone"/>
 
                 </android.support.design.widget.TextInputLayout>
 
-                <android.support.design.widget.TextInputLayout
-                    android:id="@+id/input_layout_year"
+                <Spinner
+                    android:id="@+id/spinner_year"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="8dp"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content" />
 
-                    <android.support.design.widget.TextInputEditText
-                        android:id="@+id/input_year"
-                        android:hint="Year"
-                        android:maxLines="1"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
-
-                </android.support.design.widget.TextInputLayout>
 
                 <Button
                     android:id="@+id/register_submit"

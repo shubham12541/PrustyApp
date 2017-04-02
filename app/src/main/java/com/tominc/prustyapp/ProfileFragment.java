@@ -21,8 +21,12 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -43,7 +47,9 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.google.gson.Gson;
 import com.mikhaellopez.circularimageview.CircularImageView;
+import com.tominc.prustyapp.adapters.CollegeAutoCompleteAdapter;
 import com.tominc.prustyapp.utilities.ImageCompression;
+import com.tominc.prustyapp.views.DelayAutoCompleteTextView;
 
 import java.io.File;
 import java.io.IOException;
@@ -60,8 +66,14 @@ public class ProfileFragment extends Fragment {
 
     RelativeLayout profile_pic_change;
 
-    TextInputLayout edit_layout_name, edit_layout_phone, edit_layout_year, edit_layout_college;
-    TextInputEditText edit_input_name, edit_input_phone, edit_input_year, edit_input_college;
+    TextInputLayout edit_layout_name, edit_layout_phone, edit_layout_college;
+    TextInputEditText edit_input_name, edit_input_phone;
+
+    DelayAutoCompleteTextView edit_input_college_auto;
+
+    Spinner edit_profile_year_spinner;
+
+    private String selected_year;
 
     SharedPreferences mPrefs;
     StorageReference mStorage;
@@ -121,17 +133,50 @@ public class ProfileFragment extends Fragment {
 
         edit_layout_name = (TextInputLayout) root.findViewById(R.id.edit_profile_name);
         edit_layout_phone = (TextInputLayout) root.findViewById(R.id.edit_profile_phone);
-        edit_layout_year = (TextInputLayout) root.findViewById(R.id.edit_profile_year);
+//        edit_layout_year = (TextInputLayout) root.findViewById(R.id.edit_profile_year);
         edit_layout_college = (TextInputLayout) root.findViewById(R.id.edit_profile_college);
+        edit_profile_year_spinner = (Spinner) root.findViewById(R.id.edit_profile_year);
 
         edit_input_name = (TextInputEditText) root.findViewById(R.id.input_profile_name);
         edit_input_phone = (TextInputEditText) root.findViewById(R.id.input_profile_phone);
-        edit_input_year = (TextInputEditText) root.findViewById(R.id.input_profile_year);
-        edit_input_college = (TextInputEditText) root.findViewById(R.id.input_profile_college);
+//        edit_input_year = (TextInputEditText) root.findViewById(R.id.input_profile_year);
+//        edit_input_college = (TextInputEditText) root.findViewById(R.id.input_profile_college);
+        edit_input_college_auto = (DelayAutoCompleteTextView) root.findViewById(R.id.input_profile_college);
 
         profile_edit_fab = (FloatingActionButton) root.findViewById(R.id.profile_edit);
         edit_done_fab = (FloatingActionButton) root.findViewById(R.id.profile_edit_done);
 
+
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getActivity(),
+                R.array.year_choices, android.R.layout.simple_spinner_item);
+
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        edit_profile_year_spinner.setAdapter(adapter);
+
+        selected_year = year.getText().toString();
+
+        edit_profile_year_spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                selected_year = (String) parent.getItemAtPosition(position);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        edit_input_college_auto.setThreshold(1);
+        edit_input_college_auto.setAdapter(new CollegeAutoCompleteAdapter(getActivity()));
+        edit_input_college_auto.setLoadingIndicator((ProgressBar) root.findViewById(R.id.pb_loading_indicator));
+        edit_input_college_auto.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String college = (String) parent.getItemAtPosition(position);
+                edit_input_college_auto.setText(college);
+            }
+        });
 
         showProfileView();
         showLoading();
@@ -261,7 +306,7 @@ public class ProfileFragment extends Fragment {
 
         edit_layout_name.setVisibility(View.GONE);
         edit_layout_phone.setVisibility(View.GONE);
-        edit_layout_year.setVisibility(View.GONE);
+        edit_profile_year_spinner.setVisibility(View.GONE);
         edit_layout_college.setVisibility(View.GONE);
 
         profile_edit_fab.setVisibility(View.VISIBLE);
@@ -280,13 +325,27 @@ public class ProfileFragment extends Fragment {
 
         edit_layout_name.setVisibility(View.VISIBLE);
         edit_layout_phone.setVisibility(View.VISIBLE);
-        edit_layout_year.setVisibility(View.VISIBLE);
+        edit_profile_year_spinner.setVisibility(View.VISIBLE);
         edit_layout_college.setVisibility(View.VISIBLE);
 
         edit_input_name.setText(name.getText().toString());
-        edit_input_phone.setText(phone.getText().toString());
-        edit_input_year.setText(year.getText().toString());
-        edit_input_college.setText(college.getText().toString());
+        edit_input_phone.setText(phone.getText().toString().replace("Phone: ", ""));
+//        edit_input_year.setText(year.getText().toString());
+        selected_year = year.getText().toString();
+        edit_input_college_auto.setText(college.getText().toString().replace("College: ", ""));
+        selected_year = year.getText().toString().replace("Year: ", "");
+
+        String[] years = getResources().getStringArray(R.array.year_choices);
+
+        int temp_pos=0;
+        for(int i=0;i<years.length;i++){
+            if(selected_year.equals(years[i])){
+                temp_pos = i;
+                break;
+            }
+        }
+
+        edit_profile_year_spinner.setSelection(temp_pos);
 
         profile_edit_fab.setVisibility(View.GONE);
         edit_done_fab.setVisibility(View.VISIBLE);
@@ -299,8 +358,9 @@ public class ProfileFragment extends Fragment {
         if(validator.validate()){
             String new_name = edit_input_name.getText().toString();
             String new_phone = edit_input_phone.getText().toString();
-            String new_year = edit_input_year.getText().toString();
-            String new_college = edit_input_college.getText().toString();
+//            String new_year = edit_input_year.getText().toString();
+            String new_year = selected_year;
+            String new_college = edit_input_college_auto.getText().toString();
 
             DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("users").child(FirebaseAuth.getInstance().getCurrentUser().getUid());
 
@@ -377,7 +437,7 @@ public class ProfileFragment extends Fragment {
     public void addValidations(){
         validator.addValidation(getActivity(), R.id.edit_profile_name, "^(?!\\s*$).+", R.string.first_name_validation);
         validator.addValidation(getActivity(), R.id.edit_profile_phone, "^(?!\\s*$).+", R.string.phone_validation);
-        validator.addValidation(getActivity(), R.id.edit_profile_year, "^(?!\\s*$).+", R.string.year_validation);
+//        validator.addValidation(getActivity(), R.id.edit_profile_year, "^(?!\\s*$).+", R.string.year_validation);
         validator.addValidation(getActivity(), R.id.edit_profile_college, "^(?!\\s*$).+", R.string.error_empty_college);
     }
 }

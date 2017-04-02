@@ -162,19 +162,14 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content" />
 
-                    <android.support.design.widget.TextInputLayout
+
+                    <Spinner
                         android:id="@+id/edit_profile_year"
-                        android:hint="Year"
                         android:visibility="gone"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="8dp"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
-
-                        <android.support.design.widget.TextInputEditText
-                            android:id="@+id/input_profile_year"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content" />
-
-                    </android.support.design.widget.TextInputLayout>
+                        android:layout_height="wrap_content" />
 
                     <TextView
                         android:id="@+id/show_profile_college"
@@ -192,10 +187,28 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content">
 
-                        <android.support.design.widget.TextInputEditText
+                        <!--<android.support.design.widget.TextInputEditText-->
+                            <!--android:id="@+id/input_profile_college"-->
+                            <!--android:layout_width="match_parent"-->
+                            <!--android:layout_height="wrap_content" />-->
+
+                        <com.tominc.prustyapp.views.DelayAutoCompleteTextView
                             android:id="@+id/input_profile_college"
+                            android:inputType="textCapSentences"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content" />
+                            android:layout_height="wrap_content"
+                            android:hint="College"
+                            android:paddingEnd="8dp"
+                            android:imeOptions="flagNoExtractUi|actionSearch"/>
+
+                        <ProgressBar
+                            android:id="@+id/pb_loading_indicator"
+                            style="?android:attr/progressBarStyleSmall"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical|end"
+                            android:layout_marginRight="16dp"
+                            android:visibility="gone"/>
 
                     </android.support.design.widget.TextInputLayout>
 

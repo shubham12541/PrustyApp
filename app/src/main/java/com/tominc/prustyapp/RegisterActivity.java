@@ -21,26 +21,20 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.AuthFailureError;
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 import com.basgeekball.awesomevalidation.AwesomeValidation;
 import com.basgeekball.awesomevalidation.ValidationStyle;
 import com.basgeekball.awesomevalidation.utility.RegexTemplate;
-import com.daimajia.slider.library.SliderTypes.BaseSliderView;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -52,27 +46,20 @@ import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.google.gson.Gson;
 import com.mikhaellopez.circularimageview.CircularImageView;
+import com.tominc.prustyapp.adapters.CollegeAutoCompleteAdapter;
 import com.tominc.prustyapp.utilities.ImageCompression;
+import com.tominc.prustyapp.views.DelayAutoCompleteTextView;
 
-import net.bohush.geometricprogressview.GeometricProgressView;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.Hashtable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import de.mateware.snacky.Snacky;
@@ -87,13 +74,18 @@ public class RegisterActivity extends AppCompatActivity {
     TextInputLayout input_layout_f_name, input_layout_l_name, input_layout_email, input_layout_password, input_layout_confirm_password,
                 input_layout_phone, input_layout_college, input_layout_year;
 
-    TextInputEditText input_f_name, input_l_name, input_email, input_password, input_confirm_password, input_phone, input_college,
+    TextInputEditText input_f_name, input_l_name, input_email, input_password, input_confirm_password, input_phone,
                 input_year;
+
+    DelayAutoCompleteTextView input_college_auto;
+
+    private String selected_year;
+
+    Spinner spinner_year;
 
     LinearLayout allRegisterItems;
     RelativeLayout change_profile_pic;
 
-//    GeometricProgressView pb;
     View pb;
 
     private final int IMAGE_REQUEST=12;
@@ -117,7 +109,7 @@ public class RegisterActivity extends AppCompatActivity {
         setContentView(R.layout.activity_register2);
 
         mAuth = FirebaseAuth.getInstance();
-
+        selected_year = "1st Year";
     }
 
     @Override
@@ -132,7 +124,6 @@ public class RegisterActivity extends AppCompatActivity {
         toolbar.setTitleTextColor(Color.WHITE);
         setSupportActionBar(toolbar);
 
-
         mPref = getSharedPreferences("app", MODE_PRIVATE);
 
         input_layout_f_name = (TextInputLayout) findViewById(R.id.input_layout_f_name);
@@ -142,16 +133,18 @@ public class RegisterActivity extends AppCompatActivity {
         input_layout_confirm_password = (TextInputLayout) findViewById(R.id.input_layout_confirm_password);
         input_layout_college = (TextInputLayout) findViewById(R.id.input_layout_college);
         input_layout_phone = (TextInputLayout) findViewById(R.id.input_layout_phone);
-        input_layout_year = (TextInputLayout) findViewById(R.id.input_layout_year);
+//        input_layout_year = (TextInputLayout) findViewById(R.id.input_layout_year);
 
         input_f_name = (TextInputEditText) findViewById(R.id.input_f_name);
         input_l_name = (TextInputEditText) findViewById(R.id.input_l_name);
         input_email = (TextInputEditText) findViewById(R.id.input_email);
         input_password = (TextInputEditText) findViewById(R.id.input_password);
         input_confirm_password = (TextInputEditText) findViewById(R.id.input_confirm_password);
-        input_college = (TextInputEditText) findViewById(R.id.input_college);
+//        input_college = (TextInputEditText) findViewById(R.id.input_college);
+        input_college_auto = (DelayAutoCompleteTextView) findViewById(R.id.input_college);
         input_phone = (TextInputEditText) findViewById(R.id.input_phone);
-        input_year = (TextInputEditText) findViewById(R.id.input_year);
+//        input_year = (TextInputEditText) findViewById(R.id.input_year);
+        spinner_year = (Spinner) findViewById(R.id.spinner_year);
 
         change_profile_pic = (RelativeLayout) findViewById(R.id.profile_change_pic);
 
@@ -161,6 +154,35 @@ public class RegisterActivity extends AppCompatActivity {
         pb =  findViewById(R.id.logging_in);
         allRegisterItems = (LinearLayout) findViewById(R.id.register_items);
 
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(RegisterActivity.this,
+                R.array.year_choices, android.R.layout.simple_spinner_item);
+
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner_year.setAdapter(adapter);
+
+        spinner_year.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                selected_year = (String) parent.getItemAtPosition(position);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        input_college_auto.setThreshold(1);
+        input_college_auto.setAdapter(new CollegeAutoCompleteAdapter(RegisterActivity.this));
+        input_college_auto.setLoadingIndicator((ProgressBar) findViewById(R.id.pb_loading_indicator));
+        input_college_auto.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String college = (String) parent.getItemAtPosition(position);
+                input_college_auto.setText(college);
+            }
+        });
+
 
         validator.addValidation(RegisterActivity.this, R.id.input_layout_f_name, "^(?!\\s*$).+", R.string.first_name_validation);
 //        validator.addValidation(RegisterActivity.this, R.id.input_layout_l_name, "^(?!\\s*$).+", R.string.last_name_validation);
@@ -169,7 +191,6 @@ public class RegisterActivity extends AppCompatActivity {
         validator.addValidation(RegisterActivity.this, R.id.input_layout_confirm_password, "^(?!\\s*$).+", R.string.register_password_validation);
         validator.addValidation(RegisterActivity.this, R.id.input_layout_phone, RegexTemplate.TELEPHONE, R.string.phone_validation);
         validator.addValidation(RegisterActivity.this, R.id.input_layout_college, "[a-zA-Z\\s]+", R.string.college_validation);
-        validator.addValidation(RegisterActivity.this, R.id.input_layout_year, "^(?!\\s*$).+", R.string.year_validation);
 
 //        String regexPassword = "(?=.*[a-z])(?=.*[A-Z])(?=.*[\\d])(?=.*[~`!@#\\$%\\^&\\*\\(\\)\\-_\\+=\\{\\}\\[\\]\\|\\;:\"<>,./\\?]).{8,}";
 
@@ -204,8 +225,9 @@ public class RegisterActivity extends AppCompatActivity {
                     String s_pass = input_password.getText().toString();
                     String s_c_pass = input_confirm_password.getText().toString();
                     String s_phone = input_phone.getText().toString();
-                    String s_college = input_college.getText().toString();
-                    String s_year = input_year.getText().toString();
+//                    String s_college = input_college.getText().toString();
+                    String s_college = input_college_auto.getText().toString();
+                    String s_year = selected_year;
 
                     if (s_name.length() == 0 || s_email.length() == 0 || s_pass.length() == 0 || s_c_pass.length() == 0
                             || s_phone.length() == 0 || s_c_pass.length() == 0 || s_college.length() == 0
