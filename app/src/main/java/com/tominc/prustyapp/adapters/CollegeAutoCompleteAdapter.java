@@ -9,6 +9,8 @@ import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.TextView;
 
+import com.tominc.prustyapp.utilities.CollegeService;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -84,6 +86,24 @@ public class CollegeAutoCompleteAdapter extends BaseAdapter implements Filterabl
         List<String> arrayList = new ArrayList<>();
         arrayList.add("NIT Hamirpur");
         arrayList.add("MNIT Jaipur");
+        arrayList.add("NIT Allahbad");
+        arrayList.add("NIT Kurushetra");
+        arrayList.add("NIT Srinagar");
+        arrayList.add("NIT Delhir");
+        arrayList.add("NIT Warangal");
+        arrayList.add("NIT Tirchi");
+        arrayList.add("IIT Delhi");
+        arrayList.add("IIT Bombay");
+        arrayList.add("IIT Ropar");
+        arrayList.add("IIT Kanpur");
+        arrayList.add("IIT Kharagpur");
+        arrayList.add("IIT Gwahati");
+        arrayList.add("IIT Gandhinagar");
+        arrayList.add("Jaypee Noida");
+        arrayList.add("Thapar University");
+
         return arrayList;
+//        CollegeService collegeService = new CollegeService();
+//        return collegeService.getColleges(college);
     }
 }
