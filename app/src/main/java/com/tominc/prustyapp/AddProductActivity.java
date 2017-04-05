@@ -117,6 +117,8 @@ public class AddProductActivity extends AppCompatActivity {
         toolbar.setTitleTextColor(Color.WHITE);
         setSupportActionBar(toolbar);
 
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         mPrefs = getSharedPreferences("app", MODE_PRIVATE);
         Gson gson = new Gson();
         String json = mPrefs.getString("user", "");

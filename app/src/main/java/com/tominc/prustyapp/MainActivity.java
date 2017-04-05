@@ -60,6 +60,7 @@ public class MainActivity extends AppCompatActivity
     StorageReference mStorage;
 
     private FirebaseAuth mAuth;
+    private boolean isAtHome=true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +68,8 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        setTitle(R.string.products);
 
         mAuth = FirebaseAuth.getInstance();
         FirebaseUser mUser = mAuth.getCurrentUser();
@@ -145,7 +148,13 @@ public class MainActivity extends AppCompatActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
+            if(isAtHome)
             super.onBackPressed();
+            else {
+                fragmentManager.beginTransaction().replace(R.id.frame_content,Fragment1.newInstance(user)).commit();
+                isAtHome=true;
+                setTitle(R.string.products);
+            }
         }
     }
 
@@ -188,15 +197,19 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_camera) {
+            isAtHome=true;
             fragmentManager.beginTransaction().replace(R.id.frame_content, Fragment1.newInstance(user)).commit();
             setTitle(item.getTitle());
         }  else if (id == R.id.nav_slideshow) {
+            isAtHome=false;
             fragmentManager.beginTransaction().replace(R.id.frame_content, ProfileFragment.newInstance(user)).commit();
             setTitle(item.getTitle());
         } else if (id == R.id.nav_manage) {
+            isAtHome=false;
             fragmentManager.beginTransaction().replace(R.id.frame_content, ProductLikedFragment.newInstance(user)).commit();
             setTitle(item.getTitle());
         } else if (id == R.id.nav_listed) {
+            isAtHome=false;
             fragmentManager.beginTransaction().replace(R.id.frame_content, ProductLIstedFragment.newInstance(user)).commit();
             setTitle(item.getTitle());
         } else if (id == R.id.nav_share) {

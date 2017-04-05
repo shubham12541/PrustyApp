@@ -5,7 +5,7 @@
         <item
             android:id="@+id/nav_camera"
             android:icon="@drawable/ic_menu_gallery"
-            android:title="Products" />
+            android:title="@string/products" />
         <item
             android:id="@+id/nav_slideshow"
             android:icon="@drawable/ic_menu_slideshow"

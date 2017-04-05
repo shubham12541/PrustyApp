@@ -8,6 +8,7 @@ import android.util.Log;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
@@ -43,7 +44,7 @@ public class DownloadFirebaseImage{
                         Log.d(TAG, "onSuccess: Image download link generated");
                         if(!((Activity) c).isDestroyed()){
                             Glide.with(c)
-                                    .load(uri)
+                                    .load(uri).diskCacheStrategy(DiskCacheStrategy.ALL)
                                     .listener(new RequestListener<Uri, GlideDrawable>() {
                                         @Override
                                         public boolean onException(Exception e, Uri model, Target<GlideDrawable> target, boolean isFirstResource) {
