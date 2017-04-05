@@ -27,7 +27,12 @@
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".AddProductActivity"
-            android:label="Add" />
+            android:label="Add" >
+
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".MainActivity" />
+        </activity>
         <activity android:name=".CoordinationActivity" />
         <activity
             android:name=".ShowProductActivity"

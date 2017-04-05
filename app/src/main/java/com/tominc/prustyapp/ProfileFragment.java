@@ -33,6 +33,7 @@ import android.widget.Toast;
 import com.basgeekball.awesomevalidation.AwesomeValidation;
 import com.basgeekball.awesomevalidation.ValidationStyle;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.github.ybq.android.spinkit.SpinKitView;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -229,7 +230,7 @@ public class ProfileFragment extends Fragment {
                         public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
                             if(!getActivity().isDestroyed()){
                                 Glide.with(getActivity())
-                                        .load(tempFile)
+                                        .load(tempFile).diskCacheStrategy(DiskCacheStrategy.ALL)
                                         .into(profile_image);
                                 hideLoading();
                             }
