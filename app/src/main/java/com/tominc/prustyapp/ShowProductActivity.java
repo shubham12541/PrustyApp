@@ -504,7 +504,9 @@ public class ShowProductActivity extends AppCompatActivity {
         dialog.setCancelable(false);
         dialog.show();
 
-        DatabaseReference mRef = FirebaseDatabase.getInstance().getReference("users").child(prod.getUserId());
+        DatabaseReference mRef = FirebaseDatabase.getInstance()
+                .getReference("users")
+                .child(FirebaseAuth.getInstance().getCurrentUser().getUid());
 
         String productID = prod.getProductId();
         mRef.child("productliked").push().setValue(productID);
@@ -526,7 +528,11 @@ public class ShowProductActivity extends AppCompatActivity {
         dialog.setCancelable(false);
         dialog.show();
 
-        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users").child(prod.getUserId());
+        DatabaseReference userRef = FirebaseDatabase
+                .getInstance()
+                .getReference("users")
+                .child(FirebaseAuth.getInstance().getCurrentUser().getUid());
+
         userRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {

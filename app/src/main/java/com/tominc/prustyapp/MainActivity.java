@@ -139,6 +139,7 @@ public class MainActivity extends AppCompatActivity
             }
         };
 
+
 //        mAuth.addAuthStateListener(authStateListener);
     }
 
@@ -179,10 +180,10 @@ public class MainActivity extends AppCompatActivity
                 ((ActivityManager)getApplicationContext().getSystemService(ACTIVITY_SERVICE)).clearApplicationUserData();
             }
 
-            mAuth.signOut();
             Intent in = new Intent(MainActivity.this, LoginActivity.class);
             startActivity(in);
             finish();
+            mAuth.signOut();
 
             return true;
         }
