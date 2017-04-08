@@ -292,7 +292,6 @@ public class ShowProductActivity extends AppCompatActivity {
                     PERMISSION_REQUSET);
         } else{
             Log.d(TAG, "onRequestPermissionsResult: permission granted");
-//            new DownloadImages(prod.getImageCount(), prod.getEmail(), prod.getName()).execute();
             downloadAllImages();
         }
     }

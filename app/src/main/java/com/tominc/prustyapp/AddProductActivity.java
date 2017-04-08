@@ -401,7 +401,7 @@ public class AddProductActivity extends AppCompatActivity {
         prod.setDescription(description);
         prod.setPhone(phone);
         prod.setYear(year);
-        prod.setEmail(AddProductActivity.this.email.toString());
+        prod.setEmail(AddProductActivity.this.email.getText().toString());
         prod.setCollege(college);
         prod.setImageCount(images_bitmap.size());
 
