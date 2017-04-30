@@ -282,7 +282,7 @@ public class MainActivity extends AppCompatActivity
 
             Intent in = new Intent(MainActivity.this, LoginActivity.class);
             startActivity(in);
-            finish();
+
             mAuth.signOut();
 
             return true;

@@ -12,8 +12,11 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -41,9 +44,8 @@ public class LoginActivity extends AppCompatActivity {
     Button submit;
 
     View pb;
-    RelativeLayout allLoginItems;
+    LinearLayout allLoginItems,registerItems;
 
-    TextInputLayout input_layout_email, input_layout_password;
     TextInputEditText input_email, input_password;
 
     private final String LOGIN_URL = Config.BASE_URL + "login.php";
@@ -55,15 +57,18 @@ public class LoginActivity extends AppCompatActivity {
     FirebaseAuth.AuthStateListener mAuthListener;
     DatabaseReference mRefs;
 
-    private AwesomeValidation validator = new AwesomeValidation(ValidationStyle.TEXT_INPUT_LAYOUT);
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_login2);
 
         pb =  findViewById(R.id.logging_in);
-        allLoginItems = (RelativeLayout) findViewById(R.id.login_items);
+        allLoginItems = (LinearLayout) findViewById(R.id.login_items);
+        registerItems = (LinearLayout) findViewById(R.id.register_layout);
 
         mAuth = FirebaseAuth.getInstance();
 
@@ -91,13 +96,11 @@ public class LoginActivity extends AppCompatActivity {
 //            finish();
         }
 
-        input_layout_email = (TextInputLayout) findViewById(R.id.input_email_layout);
-        input_layout_password = (TextInputLayout) findViewById(R.id.input_password_layout);
         input_email = (TextInputEditText) findViewById(R.id.input_email);
         input_password = (TextInputEditText) findViewById(R.id.input_password);
         submit = (Button) findViewById(R.id.login_submit);
 
-        validator.addValidation(LoginActivity.this, R.id.input_email_layout, Patterns.EMAIL_ADDRESS, R.string.email_validation);
+
 
         findViewById(R.id.login_skip).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -137,11 +140,9 @@ public class LoginActivity extends AppCompatActivity {
         submit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                validator.clear();
-                if(validator.validate()){
-                    String s_email = input_email.getText().toString();
-                    String s_pass = input_password.getText().toString();
-
+                String s_email = input_email.getText().toString();
+                String s_pass = input_password.getText().toString();
+                if(Patterns.EMAIL_ADDRESS.matcher(s_email).matches()){
                     if (s_email.length() == 0 || s_pass.length() == 0) {
 //                        Toast.makeText(getApplicationContext(), "Incomplete Information", Toast.LENGTH_SHORT).show();
                         Snacky.builder().setView(allLoginItems)
@@ -236,7 +237,6 @@ public class LoginActivity extends AppCompatActivity {
                     Intent in = new Intent(LoginActivity.this, MainActivity.class);
 //                                  in.putExtra("user", user);
                     startActivity(in);
-                    finish();
                 } else{
                     Log.d(TAG, "onDataChange: user logged in annoymously");
                 }
@@ -251,11 +251,13 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void logingInView(){
+        registerItems.setVisibility(View.GONE);
         allLoginItems.setVisibility(View.GONE);
         pb.setVisibility(View.VISIBLE);
     }
 
     private void defaultView(){
+        registerItems.setVisibility(View.GONE);
         allLoginItems.setVisibility(View.VISIBLE);
         pb.setVisibility(View.INVISIBLE);
     }
