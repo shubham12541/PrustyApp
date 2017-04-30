@@ -147,6 +147,14 @@
                         android:layout_height="wrap_content" />
 
                     <EditText
+                        android:id="@+id/add_product_location"
+                        android:hint="Location"
+                        android:padding="16dp"
+                        android:background="@null"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+
+                    <EditText
                         android:id="@+id/add_product_college"
                         android:hint="College"
                         android:padding="16dp"

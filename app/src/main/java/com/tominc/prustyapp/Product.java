@@ -10,7 +10,8 @@ import java.util.ArrayList;
  * Created by shubham on 14/1/16.
  */
 public class Product implements Serializable{
-    private String name, phone, year, college, productId, description, userId, email;
+    private String name, phone, year, college, productId, description, userId, email, city, state, country;
+    double longitude, latitude;
 
     public String getEmail() {
         return email;
@@ -34,6 +35,46 @@ public class Product implements Serializable{
 //    private String year;
 //    private String college;
 
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
+    }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
 
     public int getPrice() {
         return price;

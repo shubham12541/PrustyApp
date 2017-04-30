@@ -88,7 +88,7 @@ public class AddProductActivity extends AppCompatActivity {
     Toolbar toolbar;
     private SliderLayout mSlider;
 
-    EditText name, price, description, phone, email, year, college;
+    EditText name, price, description, phone, email, year, college, location;
     ScrollView allItems;
 
     ArrayList<Bitmap> images_bitmap = new ArrayList<>();
@@ -130,6 +130,7 @@ public class AddProductActivity extends AppCompatActivity {
         email = (EditText) findViewById(R.id.add_product_email);
         year = (EditText) findViewById(R.id.add_product_year);
         college = (EditText) findViewById(R.id.add_product_college);
+        location = (EditText) findViewById(R.id.add_product_location);
         description = (EditText) findViewById(R.id.add_product_description);
         sliderLayout = (RelativeLayout) findViewById(R.id.add_slider_relative);
         mSlider = (SliderLayout) findViewById(R.id.add_image_slider);
@@ -138,6 +139,8 @@ public class AddProductActivity extends AppCompatActivity {
         email.setText(user.getEmail());
         year.setText(user.getYear());
         college.setText(user.getCollege());
+        location.setText(mPrefs.getString("userCity", "") + ", " + mPrefs.getString("userState", "") + ", " + mPrefs.getString("userCountry", ""));
+
 
         findViewById(R.id.add_product_image).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -188,7 +191,7 @@ public class AddProductActivity extends AppCompatActivity {
                             .setActivty(AddProductActivity.this)
                             .setText(R.string.permission_warning)
                             .setDuration(Snacky.LENGTH_SHORT)
-                            .warning();
+                            .warning().show();
                 }
         }
     }
@@ -404,6 +407,23 @@ public class AddProductActivity extends AppCompatActivity {
         prod.setEmail(AddProductActivity.this.email.getText().toString());
         prod.setCollege(college);
         prod.setImageCount(images_bitmap.size());
+        prod.setCity(mPrefs.getString("userCity", ""));
+        prod.setState(mPrefs.getString("userState", ""));
+        prod.setCountry(mPrefs.getString("userCountry", ""));
+
+        String mLat = mPrefs.getString("lat", null);
+        if(mLat==null){
+            prod.setLatitude(0.0);
+        } else{
+            prod.setLatitude(Double.valueOf(mLat));
+        }
+
+        String mLong = mPrefs.getString("long", null);
+        if(mLong==null){
+            prod.setLatitude(0.0);
+        } else{
+            prod.setLongitude(Double.valueOf(mLong));
+        }
 
         String productUid = UUID.randomUUID().toString();
         prod.setProductId(productUid);

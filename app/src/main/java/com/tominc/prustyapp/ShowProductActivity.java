@@ -78,7 +78,7 @@ public class ShowProductActivity extends AppCompatActivity {
 
     private final String TAG = "ShowProductActivity";
 
-    TextView productName, productPrice, productDescription, productWanted,
+    TextView productName, productPrice, productDescription, productWanted, productLocation,
             profileName, profileEmail, profilePhone, profileCollege;
     CircularImageView profile_pic;
 
@@ -125,6 +125,7 @@ public class ShowProductActivity extends AppCompatActivity {
         images_pb = (SpinKitView) findViewById(R.id.loading_images);
         productName = (TextView) findViewById(R.id.show_product_name);
         productPrice = (TextView) findViewById(R.id.show_product_price);
+        productLocation = (TextView) findViewById(R.id.show_product_location);
         productDescription = (TextView) findViewById(R.id.show_product_description);
         profileCardFront = (LinearLayout) findViewById(R.id.profile_front);
         profileCardBack = (LinearLayout) findViewById(R.id.profile_back);
@@ -203,6 +204,11 @@ public class ShowProductActivity extends AppCompatActivity {
         productName.setText(prod.getName());
         productPrice.setText("Price: Rs. " + prod.getPrice());
         productDescription.setText(prod.getDescription());
+        if(prod.getCity() != null){
+            productLocation.setText(prod.getCity() + ", " + prod.getState() + ", " + prod.getCountry());
+        } else{
+            productLocation.setText("Location not available");
+        }
 //        productWanted.setText("Wanted: " + prod.getWanted());
 
         DatabaseReference mProdUser = FirebaseDatabase.getInstance().getReference("users").child(prod.getUserId());

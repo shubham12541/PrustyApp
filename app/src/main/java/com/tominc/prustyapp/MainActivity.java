@@ -1,14 +1,21 @@
 package com.tominc.prustyapp;
 
+import android.*;
+import android.Manifest;
 import android.app.ActivityManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.util.Log;
@@ -22,8 +29,10 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -34,14 +43,17 @@ import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.gson.Gson;
+import com.tominc.prustyapp.services.LocationService;
 import com.tominc.prustyapp.utilities.DownloadFirebaseImage;
 import com.tominc.prustyapp.utilities.DownloadMethods;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 
 import de.mateware.snacky.Snacky;
+import es.dmoral.toasty.Toasty;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -61,6 +73,17 @@ public class MainActivity extends AppCompatActivity
 
     private FirebaseAuth mAuth;
     private boolean isAtHome=true;
+
+    private LocationService locService;
+
+    private static final int PERMISSION_LOCATION_REQUSET = 546;
+
+    TextView mainToolbarTitle;
+    LinearLayout mainToolbarBlock;
+
+    //TODO: Added Change location feature
+    //TODO: filter product based on location
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,6 +140,9 @@ public class MainActivity extends AppCompatActivity
         nav_header_image = (ImageView) view.findViewById(R.id.nav_header_profile_pic);
         nav_header_loading_image = (RelativeLayout) view.findViewById(R.id.loading);
 
+        mainToolbarTitle = (TextView) findViewById(R.id.main_toolbar_title);
+        mainToolbarBlock = (LinearLayout) findViewById(R.id.main_toolbar_block);
+
         showNavLoadingImage();
 
 //        downloadProfilePic();
@@ -139,8 +165,82 @@ public class MainActivity extends AppCompatActivity
             }
         };
 
+        if (ActivityCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(MainActivity.this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(
+                    MainActivity.this,
+                    new String[]{ Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION },
+                    PERMISSION_LOCATION_REQUSET);
+        } else{
+            getLocation();
+
+        }
+
+
+        mainToolbarBlock.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toasty.success(MainActivity.this, "Change Location", Toast.LENGTH_SHORT).show();
+            }
+        });
 
 //        mAuth.addAuthStateListener(authStateListener);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode){
+            case PERMISSION_LOCATION_REQUSET:
+                if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                    getLocation();
+                } else{
+                    Snacky.builder()
+                            .setActivty(MainActivity.this)
+                            .setDuration(Snacky.LENGTH_SHORT)
+                            .setText("Location Permission required")
+                            .warning().show();
+                }
+        }
+    }
+
+    private void getLocation(){
+        locService = new LocationService(MainActivity.this);
+
+        Location loc = locService.getLocation();
+
+        if(loc != null){
+            Geocoder geoCoder = new Geocoder(this, Locale.getDefault());
+            try {
+                List<Address> addresses = geoCoder.getFromLocation(loc.getLatitude(), loc.getLongitude(), 1);
+                String userCity = addresses.get(0).getAddressLine(0);
+                String userState = addresses.get(0).getAddressLine(1);
+                String userCountry = addresses.get(0).getAddressLine(2);
+
+                mainToolbarTitle.setText(userCity + ", " + userState);
+                Log.d(TAG, "getLocation: Location availalbe " + userCity + ", " + userState + ", " + userCountry);
+
+                SharedPreferences.Editor edit = mPrefs.edit();
+                edit.putString("userCity", userCity);
+                edit.putString("userState", userState);
+                edit.putString("userCountry", userCountry);
+                edit.putString("long", Double.toString(loc.getLongitude()));
+                edit.putString("lat", Double.toString(loc.getLatitude()));
+
+                edit.apply();
+            } catch (IOException e) {
+                e.printStackTrace();
+                Log.e(TAG, "getLocation: Error getting address " +  e.toString());
+            }
+        } else{
+            Log.e(TAG, "getLocation: Location not available");
+        }
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        locService.stopUsingGPS();
     }
 
     @Override
