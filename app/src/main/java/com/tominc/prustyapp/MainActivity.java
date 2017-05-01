@@ -3,6 +3,7 @@ package com.tominc.prustyapp;
 import android.*;
 import android.Manifest;
 import android.app.ActivityManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -28,6 +29,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageView;
@@ -88,7 +90,7 @@ public class MainActivity extends AppCompatActivity
     TextView mainToolbarTitle;
     LinearLayout mainToolbarBlock;
 
-    //TODO: Added Change location feature
+    //TODO: Added Change location feature - DONE
     //TODO: filter product based on location
 
 
@@ -160,17 +162,20 @@ public class MainActivity extends AppCompatActivity
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 PlaceModel placeSelected = (PlaceModel) parent.getItemAtPosition(position);
 
+
                 String location="";
                 SharedPreferences.Editor edit = mPrefs.edit();
                 if(placeSelected.getCity() != null){
                     edit.putString("userCity", placeSelected.getCity());
                     location += placeSelected.getCity();
                     mainToolbarTitle.setText(placeSelected.getCity());
+                    autocomplateCity.setText(placeSelected.getCity());
                 }
                 if(placeSelected.getState() != null){
                     edit.putString("userState", placeSelected.getState());
                     location += placeSelected.getState();
                     mainToolbarTitle.setText(placeSelected.getCity() + ", " + placeSelected.getState());
+                    autocomplateCity.setText(placeSelected.getCity() + ", " + placeSelected.getState());
 
                 }
                 if(placeSelected.getCountry() != null){
@@ -189,6 +194,8 @@ public class MainActivity extends AppCompatActivity
                     }
                 }
                 edit.apply();
+
+                hideCityInput();
             }
         });
 
@@ -229,12 +236,18 @@ public class MainActivity extends AppCompatActivity
         mainToolbarBlock.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toasty.success(MainActivity.this, "Change Location", Toast.LENGTH_SHORT).show();
+//                Toasty.success(MainActivity.this, "Change Location", Toast.LENGTH_SHORT).show();
                 showCityInput();
             }
         });
 
 //        mAuth.addAuthStateListener(authStateListener);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        hideCityInput();
     }
 
     @Override
@@ -424,11 +437,17 @@ public class MainActivity extends AppCompatActivity
     private void hideCityInput(){
         autocomplateCity.setVisibility(View.GONE);
         mainToolbarBlock.setVisibility(View.VISIBLE);
+
+        InputMethodManager imm = (InputMethodManager) getSystemService(this.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(autocomplateCity.getWindowToken(), 0);
     }
 
     private void showCityInput(){
         autocomplateCity.setVisibility(View.VISIBLE);
         mainToolbarBlock.setVisibility(View.GONE);
+        autocomplateCity.requestFocus();
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.showSoftInput(autocomplateCity, InputMethodManager.SHOW_IMPLICIT);
     }
 
 }
