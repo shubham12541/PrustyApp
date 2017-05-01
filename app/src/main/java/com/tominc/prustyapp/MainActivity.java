@@ -28,6 +28,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.AdapterView;
+import android.widget.AutoCompleteTextView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -43,9 +45,12 @@ import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.gson.Gson;
+import com.tominc.prustyapp.adapters.PlacesAutoCompleteAdapter;
+import com.tominc.prustyapp.models.PlaceModel;
 import com.tominc.prustyapp.services.LocationService;
 import com.tominc.prustyapp.utilities.DownloadFirebaseImage;
 import com.tominc.prustyapp.utilities.DownloadMethods;
+import com.tominc.prustyapp.views.DelayAutoCompleteTextView;
 
 import java.io.File;
 import java.io.IOException;
@@ -68,6 +73,8 @@ public class MainActivity extends AppCompatActivity
     TextView nav_header_name, nav_header_email;
     ImageView nav_header_image;
     RelativeLayout nav_header_loading_image;
+
+    DelayAutoCompleteTextView autocomplateCity;
 
     StorageReference mStorage;
 
@@ -142,6 +149,48 @@ public class MainActivity extends AppCompatActivity
 
         mainToolbarTitle = (TextView) findViewById(R.id.main_toolbar_title);
         mainToolbarBlock = (LinearLayout) findViewById(R.id.main_toolbar_block);
+        autocomplateCity = (DelayAutoCompleteTextView) findViewById(R.id.main_toolbar_city_input);
+
+        hideCityInput();
+
+        autocomplateCity.setAdapter(new PlacesAutoCompleteAdapter(MainActivity.this));
+
+        autocomplateCity.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                PlaceModel placeSelected = (PlaceModel) parent.getItemAtPosition(position);
+
+                String location="";
+                SharedPreferences.Editor edit = mPrefs.edit();
+                if(placeSelected.getCity() != null){
+                    edit.putString("userCity", placeSelected.getCity());
+                    location += placeSelected.getCity();
+                    mainToolbarTitle.setText(placeSelected.getCity());
+                }
+                if(placeSelected.getState() != null){
+                    edit.putString("userState", placeSelected.getState());
+                    location += placeSelected.getState();
+                    mainToolbarTitle.setText(placeSelected.getCity() + ", " + placeSelected.getState());
+
+                }
+                if(placeSelected.getCountry() != null){
+                    edit.putString("userCountry", placeSelected.getCountry());
+                    location += placeSelected.getCountry();
+                }
+                if(Geocoder.isPresent()){
+                    try{
+                        Geocoder geoCoder = new Geocoder(MainActivity.this);
+                        List<Address> addresses = geoCoder.getFromLocationName(location, 1);
+                        edit.putString("lat", Double.toString(addresses.get(0).getLatitude()));
+                        edit.putString("long", Double.toString(addresses.get(0).getLongitude()));
+
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                edit.apply();
+            }
+        });
 
         showNavLoadingImage();
 
@@ -181,6 +230,7 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 Toasty.success(MainActivity.this, "Change Location", Toast.LENGTH_SHORT).show();
+                showCityInput();
             }
         });
 
@@ -249,12 +299,17 @@ public class MainActivity extends AppCompatActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            if(isAtHome)
-            super.onBackPressed();
+            if(isAtHome){
+                if(autocomplateCity.getVisibility() == View.VISIBLE){
+                    hideCityInput();
+                } else{
+                    super.onBackPressed();
+                }
+            }
             else {
                 fragmentManager.beginTransaction().replace(R.id.frame_content,Fragment1.newInstance(user)).commit();
                 isAtHome=true;
-                setTitle(R.string.products);
+//                setTitle(R.string.products);
             }
         }
     }
@@ -363,6 +418,17 @@ public class MainActivity extends AppCompatActivity
 
     private void hideNavLoadingImage(){
         nav_header_loading_image.setVisibility(View.GONE);
+    }
+
+
+    private void hideCityInput(){
+        autocomplateCity.setVisibility(View.GONE);
+        mainToolbarBlock.setVisibility(View.VISIBLE);
+    }
+
+    private void showCityInput(){
+        autocomplateCity.setVisibility(View.VISIBLE);
+        mainToolbarBlock.setVisibility(View.GONE);
     }
 
 }
