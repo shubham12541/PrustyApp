@@ -91,7 +91,8 @@ public class MainActivity extends AppCompatActivity
     LinearLayout mainToolbarBlock;
 
     //TODO: Added Change location feature - DONE
-    //TODO: filter product based on location
+    //TODO: filter product based on location - DONE
+    // TODO: When selecting state option to set Current location
 
 
     @Override

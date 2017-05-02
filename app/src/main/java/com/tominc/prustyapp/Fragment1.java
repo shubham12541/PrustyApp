@@ -1,5 +1,6 @@
 package com.tominc.prustyapp;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
@@ -25,6 +26,8 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import de.mateware.snacky.Snacky;
 
+import static android.content.Context.MODE_PRIVATE;
+
 /**
  * Created by shubham on 13/1/16.
  */
@@ -42,6 +45,8 @@ public class Fragment1 extends Fragment {
     View noDataFoundView;
 
     DatabaseReference mRef;
+
+    SharedPreferences mPrefs;
 
     private final String TAG = "GetAllProductFragment";
 
@@ -190,22 +195,48 @@ public class Fragment1 extends Fragment {
             }
         };
 
-        mRef.addChildEventListener(childEventListener);
+        mPrefs = getActivity().getSharedPreferences("app", MODE_PRIVATE);
+        String city = mPrefs.getString("userCity", null);
 
-        mRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if(items.size()==0){
-                    noDataFoundView.setVisibility(View.VISIBLE);
+        if(city != null){
+            mRef.orderByChild("city").equalTo(city).addChildEventListener(childEventListener);
+            mRef.orderByChild("city").equalTo(city).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if(items.size()==0){
+                        setNoDataFoundView();
+                    }
                 }
-            }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.d(TAG, "onCancelled: No value loaded");
-            }
-        });
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    Log.d(TAG, "onCancelled: No value loaded");
+                }
+            });
+        } else{
+            mRef.addChildEventListener(childEventListener);
+            mRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if(items.size()==0){
+//                    noDataFoundView.setVisibility(View.VISIBLE);
+                        setNoDataFoundView();
+                    }
+                }
 
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    Log.d(TAG, "onCancelled: No value loaded");
+                }
+            });
+        }
+
+
+    }
+
+    private void setNoDataFoundView(){
+        noDataFoundView.setVisibility(View.VISIBLE);
+        pb.setVisibility(View.GONE);
     }
 
 }
